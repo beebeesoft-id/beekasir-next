@@ -22,7 +22,12 @@ export async function POST(req : Request, response : Response, head : Headers) {
       return getDocs(ref).then((getDoc) => {
         
         getDoc.forEach((d) => {
-          data.push(d.data());
+          const df = d.data();
+          df.price = Number(df.price);
+          df.cost = Number(df.cost);
+          df.stockCrash = Number(df.stockCrash);
+          df.stockMin = Number(df.stockMin);
+          data.push(df);
         })
         
         

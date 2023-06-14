@@ -3,5 +3,5 @@ export default function ProductsLayout({
   }: {
     children: React.ReactNode
   }) {
-    return <div className="px-10">{children}</div>
+    return <div>{children}</div>
   }

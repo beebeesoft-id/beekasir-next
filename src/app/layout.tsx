@@ -4,8 +4,8 @@ import { Analytics } from '@vercel/analytics/react'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'BeeKasir - Smart Aplikasi Kasir | Point Of Sales',
-  description: 'Beekasir adalah aplikasi kasir pintar untuk android gratis',
+  title: 'BeeKasir - Aplikasi Kasir | POS',
+  description: 'Beekasir adalah aplikasi kasir gratis untuk android',
 }
 
 export default function RootLayout({
