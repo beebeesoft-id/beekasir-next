@@ -2,7 +2,7 @@
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow } from "@mui/material";
 import { useEffect, useState } from "react"
 import Loading from "./loading";
-import { redirect, useRouter } from 'next/navigation'
+import { redirect, useRouter, useSearchParams } from 'next/navigation'
 interface Column {
     id: 'productName' | 'code' | 'price' | 'size' | 'density';
     label: string;
@@ -49,6 +49,7 @@ export default function Products({
   }) {
   const [data, setData] = useState([]);
   const [isLoading, setLoading] = useState(false)
+  const param = useSearchParams();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const router = useRouter();
@@ -67,32 +68,41 @@ export default function Products({
   }, [])
  
     async function getData() {
-    console.log("query param");
-    console.log(searchParams);
-    
-    if (!searchParams.q) {
-        //router.replace('/404');
+        console.log("query param");
+        console.log(searchParams);
+        console.log(param);
+        
+        let companyId : string | string[] | null = "";
+        if (searchParams.q) {
+            
+            companyId = searchParams.q;
+        } else if(param.get('q')){
+            companyId = param.get('q');
+        } else {
+            router.replace('/404');
+        }
+        
+        const api = await fetch('/api/products', {
+            method: 'POST',
+            headers :  {
+                'Content-Type': 'application/json',
+                'ApiKey': '20240101',
+            },
+            body: JSON.stringify({
+                "companyId" : companyId,
+                "branchId" : "0001"
+            })});
+        setLoading(false);
+        const res = await api.json();
+        const data = await res.data;
+        
+        setData(data);
+        if (data.length == 0) {
+            console.log("data length 0");
+            
+            router.replace('/404');
+        }    
     }
-    
-    const api = await fetch('/api/products', {
-        method: 'POST',
-        headers :  {
-            'Content-Type': 'application/json',
-            'ApiKey': '20240101',
-        },
-        body: JSON.stringify({
-            "companyId" : searchParams.q,
-            "branchId" : "0001"
-        })});
-    setLoading(false);
-    const res = await api.json();
-    const data = await res.data;
-    
-    setData(data);
-    if (data.length == 0) {
-        //router.replace('/404');
-    }    
-  }
 
   if (isLoading) return <Loading/>
   if (!data) return <p>No data</p>
