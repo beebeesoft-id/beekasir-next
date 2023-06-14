@@ -8,6 +8,8 @@ export async function POST(req : Request, response : Response, head : Headers) {
       const body = await req.json();
       const headersList = headers();
       const apiKey  = headersList.get('apikey');
+      console.log("api");
+      console.log(body);
       
       if ((!apiKey) || (apiKey != process.env.APIKEY)) {
         return NextResponse.json({ 'data': [], 'error': 'Not Authenticated.' });

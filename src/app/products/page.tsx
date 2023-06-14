@@ -67,9 +67,11 @@ export default function Products({
   }, [])
  
     async function getData() {
+    console.log("query param");
+    console.log(searchParams);
     
     if (!searchParams.q) {
-        router.replace('/404');
+        //router.replace('/404');
     }
     
     const api = await fetch('/api/products', {
@@ -88,7 +90,7 @@ export default function Products({
     
     setData(data);
     if (data.length == 0) {
-        router.replace('/404');
+        //router.replace('/404');
     }    
   }
 
