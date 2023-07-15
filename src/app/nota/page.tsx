@@ -1,4 +1,5 @@
 "use client"
+import { formatCcy } from "@/service/helper";
 import { Grid } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -148,7 +149,7 @@ export default function Nota({
                         <td className="text-center">{ i+1 }</td>
                         <td>{data.productName}</td>
                         <td className="text-right">{data.qty}</td>
-                        <td className="text-right">{data.price}</td>
+                        <td className="text-right">Rp{ formatCcy(data.price) }</td>
                         </tr>
                         </tbody>
                     )
@@ -171,10 +172,10 @@ export default function Nota({
                             Kembalian
                         </Grid>
                         <Grid className="sm:text-right" item sm={6} xs={6}>
-                            { (trx?.trxQty) ? trx?.trxQty : '0' } <br />
-                            { (trx?.trxTotal) ? trx?.trxTotal : '0' } <br />
-                            { (trx?.amount) ? trx?.amount : '0' } <br />
-                            { (trx?.kembalian) ? trx?.kembalian : '0' }
+                            { (trx?.trxQty) ? formatCcy(trx?.trxQty) : '0' } <br />
+                            Rp{ (trx?.trxTotal) ? formatCcy(trx?.trxTotal) : '0' } <br />
+                            Rp{ (trx?.amount) ? formatCcy(trx?.amount) : '0' } <br />
+                            Rp{ (trx?.kembalian) ? formatCcy(trx?.kembalian) : '0' }
 
                         </Grid>
                     </Grid>
