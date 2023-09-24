@@ -1,4 +1,4 @@
-
+import Swal from 'sweetalert2'
 
 export function formatCcy(amount:any) {
     if (amount == '') {
@@ -10,4 +10,13 @@ export function formatCcy(amount:any) {
     }
     
     return String(amount.toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'))
+}
+
+export function AlertSweet(status:string | any, title:string, desc:string) {
+    Swal.fire({
+        title: title,
+        text: desc,
+        icon: status,
+        confirmButtonText: 'OK'
+      });
 }
