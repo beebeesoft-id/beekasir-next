@@ -1,28 +1,20 @@
 "use client"
 
-import { Auth, DB } from "@/service/firebase";
 import { AlertSweet } from "@/service/helper";
 import { Alert, Button, TextField } from "@mui/material";
 import { useState } from "react";
-import { signInWithEmailAndPassword } from 'firebase/auth'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import Link from "next/link";
+import { redirect, useRouter } from "next/navigation";
+
 export default function Login() {
   const { handleSubmit, register, formState: { errors }} = useForm();
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState('');
-  const [statusDesc, setStatusDesc] = useState('');
+  const router = useRouter();
 
   const handleLogin = (data:any) => {
-    console.log(data);
-    
-    
-    console.log('Login');
+    //console.log(data);
     getUser(data);
-    // setStatus('warn');
-    // setStatusDesc('Silahkan isi username dan password');
-
-    
   }
 
   async function getUser(user : any) {
@@ -43,7 +35,8 @@ export default function Login() {
     if (!res.data) {
       AlertSweet('error','Gagal Login','Username atau password tidak sesuai ' + res.statusDesc );
     } else {
-      AlertSweet('info','Info','Beekasir web belum dibuka.');
+      //AlertSweet('info','Info','Beekasir web belum dibuka.');
+      router.push('/admin');
     }
     
   }
@@ -97,9 +90,9 @@ export default function Login() {
             </form>
   
             <p className="mt-10 text-center text-sm text-gray-500">
-              Not a member?{' '}
+              Buat akun di aplikasi Beekasir{' '}
               <a href="#" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
-                Start a 14 day free trial
+                Go to Google Playstore
               </a>
             </p>
           </div>
