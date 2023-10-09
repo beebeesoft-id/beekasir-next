@@ -69,7 +69,7 @@ export default function AdminLayout({
           setState({ ...state, [anchor]: open });
     };
 
-    const IconConvert = ({name}) => {
+    const IconConvert = ({name} : { name: string}) => {
       
       if (name == 'dashboard') {
         return (

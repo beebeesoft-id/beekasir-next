@@ -1,7 +1,7 @@
 "use client"
 
 import { AlertSweet } from "@/service/helper";
-import { Alert, Button, TextField } from "@mui/material";
+import { Alert, Button, LinearProgress, TextField } from "@mui/material";
 import { useState } from "react";
 import { SubmitHandler, useForm } from 'react-hook-form'
 import Link from "next/link";
@@ -62,6 +62,7 @@ export default function Login() {
                 <TextField type="email" 
                   fullWidth 
                   label="Email"
+                  disabled={loading}
                   { ...register('username', { required:{ value:true, message:'Silahkan masukkan email' }})} 
                   helperText={ (errors.username?.message) ? errors.username?.message.toString() : '' }
                   variant="outlined" />
@@ -73,6 +74,7 @@ export default function Login() {
                 type="password" 
                 fullWidth 
                 label="Password" 
+                disabled={loading}
                 { ...register('password', { required:{ value:true, message:'Silahkan masukkan password' }})} 
                 helperText={ (errors.password?.message) ? errors.password?.message.toString() : '' }
                 variant="outlined" />
@@ -86,6 +88,7 @@ export default function Login() {
                 >
                   Sign in
                 </Button>
+                <LinearProgress hidden={!loading} />
               </div>
             </form>
   
