@@ -8,11 +8,13 @@ import Logout from '@mui/icons-material/Logout';
 import { 
   ProductionQuantityLimits,
   AccountCircle,
-  MoreVert
+  MoreVert,
+  Dashboard,
 } from '@mui/icons-material';
 
 import React, { useState } from "react";
 import { deepPurple } from "@mui/material/colors";
+import { useRouter } from "next/navigation";
 
 export default function AdminLayout({
     children,
@@ -22,6 +24,8 @@ export default function AdminLayout({
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
+    const router = useRouter();
+
     const handleClick = (event: any) => {
         setAnchorEl(event.currentTarget);
     };
@@ -29,14 +33,29 @@ export default function AdminLayout({
         setAnchorEl(null);
     };
 
+    const go = (link : string) => {
+      if (link == 'dashboard') {
+        router.push('/admin');  
+      } else {
+        router.push('/admin/' + link);
+      }
+      
+    };
+
+    const onLogout = () => {
+      
+      router.push('/login');
+            
+    };
+
     const [state, setState] = useState({
         top: false,
         left: false,
         bottom: false,
         right: false,
-      });
+    });
     
-      const toggleDrawer =
+    const toggleDrawer =
         (anchor: any, open: boolean) =>
         (event: React.KeyboardEvent | React.MouseEvent) => {
           if (
@@ -48,9 +67,26 @@ export default function AdminLayout({
           }
     
           setState({ ...state, [anchor]: open });
-        };
+    };
+
+    const IconConvert = ({name}) => {
+      
+      if (name == 'dashboard') {
+        return (
+          <Dashboard/>
+        )
+      } else if (name == 'penjualan') {
+        return (
+          <ProductionQuantityLimits/>
+        )
+      } else {
+        return(
+          <MailIcon />
+        )
+      }
+    }
     
-      const list = (anchor: any) => (
+    const list = (anchor: any) => (
         <Box
           sx={{ width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 250 }}
           role="presentation"
@@ -74,11 +110,11 @@ export default function AdminLayout({
           </Card>
           
           <List>
-            {['Product', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
+            {['dashboard', 'penjualan', 'Send email', 'Drafts'].map((text, index) => (
               <ListItem key={text} disablePadding>
-                <ListItemButton>
+                <ListItemButton onClick={ () => { go(text) }}>
                   <ListItemIcon>
-                    {text == 'Product' ? <ProductionQuantityLimits/> : <MailIcon />}
+                    <IconConvert name={text}/>
                   </ListItemIcon>
                   <ListItemText primary={text} />
                 </ListItemButton>
@@ -99,7 +135,7 @@ export default function AdminLayout({
             ))}
           </List>
         </Box>
-      );
+    );
     
 
     return (
@@ -139,7 +175,7 @@ export default function AdminLayout({
                     <MenuItem onClick={handleClose}>Profile</MenuItem>
                     <MenuItem onClick={handleClose}>My account</MenuItem>
                     <Divider />
-                    <MenuItem onClick={handleClose}>
+                    <MenuItem onClick={onLogout}>
                         <ListItemIcon>
                             <Logout fontSize="small" />
                         </ListItemIcon>
