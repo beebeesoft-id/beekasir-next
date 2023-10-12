@@ -17,6 +17,21 @@ export function AlertSweet(status:string | any, title:string, desc:string) {
         title: title,
         text: desc,
         icon: status,
-        confirmButtonText: 'OK'
+        confirmButtonText: 'OK',
+      });
+}
+
+export function ConfirmSweet(status:string | any, title:string, desc:string, fn : Function) {
+    Swal.fire({
+        title: title,
+        text: desc,
+        icon: status,
+        confirmButtonText: 'Ya',
+        cancelButtonText: 'Tidak',
+        showCancelButton: true,
+      }).then((response) => {
+        if (response.isConfirmed) {
+            fn();
+        }
       });
 }
