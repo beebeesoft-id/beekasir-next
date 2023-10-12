@@ -1,4 +1,4 @@
-import { Auth, DB } from "@/service/firebase";
+import { AUTH, DB } from "@/service/firebase";
 import { DocumentData, collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { headers } from "next/dist/client/components/headers";
@@ -28,7 +28,7 @@ export async function POST(req : Request, response : Response, head : Headers) {
         return NextResponse.json({ 'data': null, 'status': '204', 'statusDesc' : 'no-content'});
       }
 
-      const signIn = await signInWithEmailAndPassword(Auth, body.username, body.password).then((value) => {
+      const signIn = await signInWithEmailAndPassword(AUTH, body.username, body.password).then((value) => {
         
         return value;
       }).catch((reason) => {
