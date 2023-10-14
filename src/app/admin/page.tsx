@@ -34,9 +34,9 @@ export default function AdminPage() {
             {
                 menus.map((m, i) => {
                     return (
-                        <Card key={i}>
+                        <Card style={{backgroundColor:'#1976d2', color:'#fff'}} key={i}>
                             <CardContent>
-                                <FontAwesomeIcon icon={m.icon} size="lg"/>
+                                <FontAwesomeIcon icon={m.icon} size="8x"/>
                             </CardContent>
                             <CardActions>{ m.label}</CardActions>
                         </Card>
