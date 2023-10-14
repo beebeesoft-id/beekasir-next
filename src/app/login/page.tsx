@@ -1,43 +1,131 @@
 "use client"
 
-import { AlertSweet } from "@/service/helper";
+import { AlertSweet, ToastSweet, localSave } from "@/service/helper";
 import { Alert, Button, LinearProgress, TextField } from "@mui/material";
 import { useState } from "react";
 import { SubmitHandler, useForm } from 'react-hook-form'
 import Link from "next/link";
 import { redirect, useRouter } from "next/navigation";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { AUTH, DB } from "@/service/firebase";
+import { collection, doc, getDoc } from "firebase/firestore";
 
 export default function Login() {
   const { handleSubmit, register, formState: { errors }} = useForm();
   const [loading, setLoading] = useState(false);
+  const [loadingDesc, setLoadingDesc] = useState('Please wait');
   const router = useRouter();
 
   const handleLogin = (data:any) => {
-    //console.log(data);
+    // console.log(data);
     getUser(data);
   }
 
   async function getUser(user : any) {
     setLoading(true);
-    const api = await fetch('/api/auth', {
-        method: 'POST',
-        headers :  {
-            'Content-Type': 'application/json',
-            'ApiKey': '20240101',
-        },
-        body: JSON.stringify(user)
-      });
-
-    const res = await api.json();
-    setLoading(false);
-    console.log(res.data);
+    setLoadingDesc('Check User');
     
-    if (!res.data) {
-      AlertSweet('error','Gagal Login','Username atau password tidak sesuai ' + res.statusDesc );
+    const ref = doc(DB, 'Users', user.username);
+    const data = await getDoc(ref);
+    const row = data.data();
+    
+    if (!row) {
+      setLoading(false);
+      setLoadingDesc('User Tidak Terdaftar');
+      AlertSweet('warning', 'Login Gagal','Username atau Password tidak sesuai');
     } else {
-      //AlertSweet('info','Info','Beekasir web belum dibuka.');
-      router.push('/admin');
+      localSave('@user', row);
+      setLoadingDesc('User Terdaftar');
+      getCompany(row, user);
     }
+  }
+
+  async function getCompany(user : any, login: any) {
+    try {
+      setLoading(true);
+      setLoadingDesc('Check Data Usaha');
+      //console.log(user);
+      
+      const ref = doc(DB, 'Company', user.companyId);
+      //console.log(ref);
+      
+      const data = await getDoc(ref);
+      //console.log(data);
+      
+      const row = data.data();
+      //console.log(row);
+      
+      if (!row) {
+        setLoading(false);
+        setLoadingDesc('Usaha Tidak Terdaftar');
+        AlertSweet('warning', 'Login Gagal','Silahkan login di aplikasi mobile untuk melengkapi data.');
+      } else {
+        localSave('@company', row);
+        setLoadingDesc('Usaha Terdaftar');
+        getBranch(user, login);
+      }
+    } catch (error) {
+      setLoading(false);
+      AlertSweet('error', 'Login Gagal','ERR.62 ' + error);
+    }
+    
+  }
+
+  async function getBranch(user : any, login: any) {
+    try {
+      setLoading(true);
+      setLoadingDesc('Check Cabang User');
+      console.log(user);
+      
+      const ref = doc(DB, 'Company/' + user.companyId + '/Branch', user.branchId);
+      console.log(ref);
+      
+      const data = await getDoc(ref);
+      console.log(data);
+      
+      const row = data.data();
+      //console.log(row);
+      
+      if (!row) {
+        setLoading(false);
+        setLoadingDesc('Cabang Tidak Terdaftar');
+        AlertSweet('warning', 'Login Gagal','Silahkan login di aplikasi mobile untuk melengkapi data.');
+      } else {
+        localSave('@branch', row);
+        setLoadingDesc('Cabang User ditemukan');
+        checkLDAP(login);
+      }
+    } catch (error) {
+      setLoading(false);
+      AlertSweet('error', 'Login Gagal','ERR.100 ' + error);
+    }
+    
+  }
+
+  async function checkLDAP(user : any) {
+    setLoading(true);
+    setLoadingDesc('Check LDAP');
+    console.log(user);
+    
+    signInWithEmailAndPassword(AUTH, user.username, user.password).then((value) => {
+      ToastSweet('success', 'Welcome ' + value.user.email + '.');
+      
+      setLoadingDesc('Anda akan diarahkan ke halaman admin.');
+      router.push('/admin');
+    }).catch((err) => {
+      setLoading(false);
+      if (err.code.includes('wrong-password')) {
+        AlertSweet('warning', 'Login Gagal','Username atau Password tidak sesuai');
+      } else if (err.code.includes('user-disable')) {
+        AlertSweet('warning', 'Login Gagal','User Tidak Aktif');
+      } else if (err.code.includes('too-many-requests')) {
+        AlertSweet('warning', 'Login Gagal','User diblokir sementara karena teralu banyak percobaan login');
+      } else if (err.code.includes('auth/network-request-failed')) {
+        AlertSweet('warning', 'Login Gagal','Ops, Untuk Login Membutuhkan Koneksi Internet.');
+      } else {
+        AlertSweet('error', 'Login Gagal','ERR.LOGIN.36 Ups Terjadi kesalahan sistem. silahkan ulangi.');
+      }
+    });
     
   }
     return (
@@ -88,7 +176,12 @@ export default function Login() {
                 >
                   Sign in
                 </Button>
-                <LinearProgress hidden={!loading} />
+                
+              </div>
+              <br/>
+              <div>
+              <LinearProgress hidden={!loading} />
+              <Alert hidden={!loading} severity="info">{loadingDesc}</Alert>
               </div>
             </form>
   

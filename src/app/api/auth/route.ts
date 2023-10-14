@@ -29,6 +29,7 @@ export async function POST(req : Request, response : Response, head : Headers) {
       }
 
       const signIn = await signInWithEmailAndPassword(AUTH, body.username, body.password).then((value) => {
+        console.log(value);
         
         return value;
       }).catch((reason) => {

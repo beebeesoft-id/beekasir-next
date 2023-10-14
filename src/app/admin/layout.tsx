@@ -1,6 +1,6 @@
 "use client";
 
-import { AppBar, Avatar, Box, Button, Card, CardActions, CardContent, CardHeader, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Toolbar, Typography } from "@mui/material"
+import { AppBar, Avatar, Box, Button, Card, CardActions, CardContent, CardHeader, Container, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Toolbar, Typography } from "@mui/material"
 import MenuIcon from '@mui/icons-material/Menu'
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
@@ -12,11 +12,17 @@ import {
   Dashboard,
 } from '@mui/icons-material';
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { deepPurple } from "@mui/material/colors";
 import { useRouter } from "next/navigation";
-import { ConfirmSweet } from "@/service/helper";
+import { ConfirmSweet, ToastSweet, localGet } from "@/service/helper";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { AUTH } from "@/service/firebase";
+import { fa9, fas } from "@fortawesome/free-solid-svg-icons";
+import { fab } from "@fortawesome/free-brands-svg-icons";
+import { library } from "@fortawesome/fontawesome-svg-core";
 
+library.add(fas, fab, fa9);
 export default function AdminLayout({
     children,
   }: {
@@ -26,6 +32,58 @@ export default function AdminLayout({
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const router = useRouter();
+    const [user, setUser] = useState<any>({});
+    const [company, setCompany] = useState<any>({});
+    const [branch, setBranch] = useState<any>({});
+
+    useEffect(() => {
+      autoload();
+    
+      return () => {
+        
+      }
+    }, []);
+    
+    const autoload = async() => {
+    //   console.log("autoload");
+    //   console.log(AUTH.currentUser);
+    //   const api = await fetch('/api/whoami', {
+    //     method: 'GET',
+    //     headers :  {
+    //         'Content-Type': 'application/json',
+    //         'ApiKey': '20240101',
+    //     }
+    //   });
+
+    // const res = await api.json();
+    // console.log(res);
+      const localUser = await localGet('@user');
+      console.log(localUser);
+      setUser(localUser);
+
+      const localCompany = await localGet('@company');
+      console.log(localCompany);
+      setCompany(localCompany);
+
+      const localBranch = await localGet('@branch');
+      console.log(localBranch);
+      setBranch(localBranch);
+
+      onAuthStateChanged(AUTH, (user) => {
+        
+        if (user) {
+          console.log("logged in");
+          
+        } else {
+          console.log("logout");
+          router.push('/login');  
+        }
+        
+      }, (reason) => {
+        console.log(reason);
+        
+      })
+    }
 
     const handleClick = (event: any) => {
         setAnchorEl(event.currentTarget);
@@ -43,10 +101,20 @@ export default function AdminLayout({
       
     };
 
+    async function apiLogout() {
+      try {
+        signOut(AUTH);
+        ToastSweet('success', 'Anda sudah logout.');
+        router.push('/login');
+      } catch (error) {
+        router.push('/login');
+      }
+    }
+
     const onLogout = () => {
+      handleClose();
       ConfirmSweet('warning', 'Konfirmasi Logout', 'Apakah anda akan logout?', () => {
-        console.log('ya');
-        router.push('/login');  
+        apiLogout();
       })
       
             
@@ -104,7 +172,7 @@ export default function AdminLayout({
                   FR
                 </Avatar>
               }
-              title="Kiki Kiswanto"
+              title={ user?.fullName }
               subheader="Owner"
             />
             <CardActions>
@@ -158,7 +226,7 @@ export default function AdminLayout({
                 <MenuIcon/>
               </IconButton>
               <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                Nama Toko
+                { company.companyName }
               </Typography>
               <Button
                     id="basic-button"
@@ -201,7 +269,9 @@ export default function AdminLayout({
           </Drawer>
         </React.Fragment>
         ))}
+        <div style={{padding:15}}>
         {children}
+        </div>
         </>
     )
   }

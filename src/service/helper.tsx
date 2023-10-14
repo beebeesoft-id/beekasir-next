@@ -1,5 +1,7 @@
 import Swal from 'sweetalert2'
 
+var _ = require('lodash');
+
 export function formatCcy(amount:any) {
     if (amount == '') {
         amount = 0;
@@ -34,4 +36,82 @@ export function ConfirmSweet(status:string | any, title:string, desc:string, fn 
             fn();
         }
       });
+}
+
+export function ToastSweet(status:string | any, title:string) {
+    Swal.fire({
+        title: title,
+        icon: status,
+        position:'top-right',
+        timer: 2000,
+        timerProgressBar:true
+      });
+}
+
+export function localSave(key: string, value:any) {
+    value = encrypt(value);
+    localStorage.setItem(key, value);
+}
+
+export function localGet(key: string,) {
+    try {
+        const data = localStorage.getItem(key);
+        if (data) {
+            console.log("decript local");
+            
+            const realData = decrypt(data);
+            console.log(realData);
+            
+            return realData;
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.log(error);
+        
+        return null;
+    }
+    
+    
+}
+
+import { AES, enc } from "crypto-js";
+import { globalRoleAccess, sysMenus } from './globalVar';
+const secret = 'afterCyberkay';
+
+export function encrypt(plaintext : any) {
+    try {
+        const chipertext = AES.encrypt(JSON.stringify(plaintext), secret).toString();
+        return chipertext;        
+    } catch (error) {
+        return '';
+    }
+    
+}
+
+export function decrypt(chipertext : string) {
+    try {
+        
+        const decrypt = AES.decrypt(chipertext, secret);
+        
+        const plaintext = JSON.parse(decrypt.toString(enc.Utf8));
+        
+        return plaintext;
+    } catch (error) {
+        console.log(error);
+        return '';
+    }
+    
+}
+
+export const setAccess = (data : any) => {
+    let listMenu : any[] = [];
+    let haveAccess = globalRoleAccess(data.role);
+    
+    sysMenus.forEach((menu) => {
+      if(_.includes(haveAccess, menu.id)){
+        listMenu.push(menu);
+      }
+    })
+    return listMenu;
 }

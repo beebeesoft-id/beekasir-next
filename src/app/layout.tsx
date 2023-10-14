@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react'
 const inter = Inter({ subsets: ['latin'] })
 
+
 export const metadata = {
   title: 'BeeKasir - Aplikasi Kasir | POS',
   description: 'Beekasir adalah aplikasi kasir gratis untuk android',
