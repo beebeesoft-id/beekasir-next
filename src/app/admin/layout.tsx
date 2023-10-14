@@ -15,6 +15,7 @@ import {
 import React, { useState } from "react";
 import { deepPurple } from "@mui/material/colors";
 import { useRouter } from "next/navigation";
+import { ConfirmSweet } from "@/service/helper";
 
 export default function AdminLayout({
     children,
@@ -43,8 +44,11 @@ export default function AdminLayout({
     };
 
     const onLogout = () => {
+      ConfirmSweet('warning', 'Konfirmasi Logout', 'Apakah anda akan logout?', () => {
+        console.log('ya');
+        router.push('/login');  
+      })
       
-      router.push('/login');
             
     };
 
@@ -110,7 +114,7 @@ export default function AdminLayout({
           </Card>
           
           <List>
-            {['dashboard', 'penjualan', 'Send email', 'Drafts'].map((text, index) => (
+            {['dashboard', 'penjualan'].map((text, index) => (
               <ListItem key={text} disablePadding>
                 <ListItemButton onClick={ () => { go(text) }}>
                   <ListItemIcon>
@@ -122,7 +126,7 @@ export default function AdminLayout({
             ))}
           </List>
           <Divider />
-          <List>
+          {/* <List>
             {['All mail', 'Trash', 'Spam'].map((text, index) => (
               <ListItem key={text} disablePadding>
                 <ListItemButton>
@@ -133,7 +137,7 @@ export default function AdminLayout({
                 </ListItemButton>
               </ListItem>
             ))}
-          </List>
+          </List> */}
         </Box>
     );
     
