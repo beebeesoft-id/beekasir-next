@@ -21,6 +21,7 @@ import { AUTH } from "@/service/firebase";
 import { fa9, fas } from "@fortawesome/free-solid-svg-icons";
 import { fab } from "@fortawesome/free-brands-svg-icons";
 import { library } from "@fortawesome/fontawesome-svg-core";
+import Pkg from '../../../package.json';
 
 library.add(fas, fab, fa9);
 export default function AdminLayout({
@@ -45,28 +46,17 @@ export default function AdminLayout({
     }, []);
     
     const autoload = async() => {
-    //   console.log("autoload");
-    //   console.log(AUTH.currentUser);
-    //   const api = await fetch('/api/whoami', {
-    //     method: 'GET',
-    //     headers :  {
-    //         'Content-Type': 'application/json',
-    //         'ApiKey': '20240101',
-    //     }
-    //   });
-
-    // const res = await api.json();
-    // console.log(res);
+      
       const localUser = await localGet('@user');
-      console.log(localUser);
+      //console.log(localUser);
       setUser(localUser);
 
       const localCompany = await localGet('@company');
-      console.log(localCompany);
+      //console.log(localCompany);
       setCompany(localCompany);
 
       const localBranch = await localGet('@branch');
-      console.log(localBranch);
+      //console.log(localBranch);
       setBranch(localBranch);
 
       onAuthStateChanged(AUTH, (user) => {
@@ -76,7 +66,7 @@ export default function AdminLayout({
           
         } else {
           console.log("logout");
-          router.push('/login');  
+          apiLogout();
         }
         
       }, (reason) => {
@@ -105,6 +95,7 @@ export default function AdminLayout({
       try {
         signOut(AUTH);
         ToastSweet('success', 'Anda sudah logout.');
+        localStorage.clear();
         router.push('/login');
       } catch (error) {
         router.push('/login');
@@ -182,7 +173,7 @@ export default function AdminLayout({
           </Card>
           
           <List>
-            {['dashboard', 'penjualan'].map((text, index) => (
+            {['dashboard'].map((text, index) => (
               <ListItem key={text} disablePadding>
                 <ListItemButton onClick={ () => { go(text) }}>
                   <ListItemIcon>
@@ -206,6 +197,7 @@ export default function AdminLayout({
               </ListItem>
             ))}
           </List> */}
+          <div style={{bottom:0, position:"absolute"}}>Version { Pkg.version }-beta</div>
         </Box>
     );
     
@@ -226,7 +218,7 @@ export default function AdminLayout({
                 <MenuIcon/>
               </IconButton>
               <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                { company.companyName }
+                { company?.companyName }
               </Typography>
               <Button
                     id="basic-button"

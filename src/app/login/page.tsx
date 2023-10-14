@@ -9,6 +9,8 @@ import { redirect, useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { AUTH, DB } from "@/service/firebase";
 import { collection, doc, getDoc } from "firebase/firestore";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowUpRightFromSquare, faSignIn } from "@fortawesome/free-solid-svg-icons";
 
 export default function Login() {
   const { handleSubmit, register, formState: { errors }} = useForm();
@@ -47,10 +49,8 @@ export default function Login() {
       //console.log(user);
       
       const ref = doc(DB, 'Company', user.companyId);
-      //console.log(ref);
       
       const data = await getDoc(ref);
-      //console.log(data);
       
       const row = data.data();
       //console.log(row);
@@ -75,13 +75,11 @@ export default function Login() {
     try {
       setLoading(true);
       setLoadingDesc('Check Cabang User');
-      console.log(user);
+      //console.log(user);
       
       const ref = doc(DB, 'Company/' + user.companyId + '/Branch', user.branchId);
-      console.log(ref);
       
       const data = await getDoc(ref);
-      console.log(data);
       
       const row = data.data();
       //console.log(row);
@@ -105,7 +103,6 @@ export default function Login() {
   async function checkLDAP(user : any) {
     setLoading(true);
     setLoadingDesc('Check LDAP');
-    console.log(user);
     
     signInWithEmailAndPassword(AUTH, user.username, user.password).then((value) => {
       ToastSweet('success', 'Welcome ' + value.user.email + '.');
@@ -174,7 +171,7 @@ export default function Login() {
                   disabled={loading}
                   className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >
-                  Sign in
+                  Login <FontAwesomeIcon icon={faSignIn}/> 
                 </Button>
                 
               </div>
@@ -187,8 +184,10 @@ export default function Login() {
   
             <p className="mt-10 text-center text-sm text-gray-500">
               Buat akun di aplikasi Beekasir{' '}
-              <a href="#" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
-                Go to Google Playstore
+              <a href="https://play.google.com/store/apps/details?id=com.beebeesoft.beekasir" 
+              target="blank"
+              className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
+                Download di Playstore <FontAwesomeIcon icon={faArrowUpRightFromSquare}/> 
               </a>
             </p>
           </div>

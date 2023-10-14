@@ -57,10 +57,7 @@ export function localGet(key: string,) {
     try {
         const data = localStorage.getItem(key);
         if (data) {
-            console.log("decript local");
-            
             const realData = decrypt(data);
-            console.log(realData);
             
             return realData;
         } else {
