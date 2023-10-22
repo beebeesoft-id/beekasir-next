@@ -31,3 +31,33 @@ export interface User {
     updatedDate : string,
     version : string
 }
+
+export interface Trx {
+    trxId : string,
+    kasir : string,
+    kasirId : string,
+    createdDate : string,
+    status : string,
+    trxQty : number,
+    trxTotal : number,
+    branchId : string,
+    note : string
+}
+
+export interface Item {
+    id: string,
+    productId: string,
+    productName: string,
+    cost: number,
+    price: number,
+    priceOrigin: number,
+    qty: number,
+    subTotal: number,
+    totalCost: number,
+    disc: number,
+    persen: number,
+    typeDisc: number,
+    total: number,
+    trxId:  string,
+    branchId:  string,
+}

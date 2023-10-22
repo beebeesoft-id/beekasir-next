@@ -42,9 +42,10 @@ export function ToastSweet(status:string | any, title:string) {
     Swal.fire({
         title: title,
         icon: status,
-        position:'top-right',
+        position:'bottom-left',
         timer: 2000,
-        timerProgressBar:true
+        timerProgressBar:true,
+        toast: true
       });
 }
 
@@ -111,4 +112,14 @@ export const setAccess = (data : any) => {
       }
     })
     return listMenu;
+}
+
+export function makeId(length : number) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+   }
+   return result;
 }
