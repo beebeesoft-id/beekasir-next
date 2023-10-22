@@ -2,6 +2,8 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection } from 'firebase/firestore'
 import { getAuth } from 'firebase/auth'
+import { localGet } from "./helper";
+import { User } from "./model";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -23,3 +25,16 @@ const firebaseConfig = {
 const APP = initializeApp(firebaseConfig);
 export const DB = getFirestore(APP);
 export const AUTH = getAuth(APP);
+
+export function refProduct() {
+  const user = localGet('@user');
+  console.log(user);
+  
+  return 'Company/' + user.companyId + '/Branch/' + user.branchId + '/Products';
+}
+
+export function getSessionUser() : User {
+  const user = localGet('@user');
+  
+  return user;
+}
