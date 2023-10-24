@@ -43,9 +43,10 @@ export function ToastSweet(status:string | any, title:string) {
         title: title,
         icon: status,
         position:'bottom-left',
-        timer: 2000,
+        timer: 3000,
         timerProgressBar:true,
-        toast: true
+        toast: true,
+        showConfirmButton:false
       });
 }
 
