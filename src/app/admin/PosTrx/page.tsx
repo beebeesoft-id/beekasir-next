@@ -14,23 +14,31 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import SaveIcon from '@mui/icons-material/Save';
+import PrintIcon from '@mui/icons-material/Print';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { DB, getSessionUser, refProduct } from "@/service/firebase";
 import { useEffect, useRef, useState } from "react";
 import { DocumentData, collection, getDocs } from "firebase/firestore";
 import { Item, Product, Trx, User } from "@/service/model";
-import { CardContent, List, ListItem, Paper } from "@mui/material";
+import { Button, CardContent, List, ListItem, Paper } from "@mui/material";
 import Link from "next/link";
-import { AlertSweet, ToastSweet, localGet, localSave, makeId } from "@/service/helper";
+import { AlertSweet, ToastSweet, formatCcy, localGet, localSave, makeId } from "@/service/helper";
 import MOMENT from 'moment';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 var findIndex = require('lodash/findIndex');
 var sumBy = require('lodash/sumBy');
 
 export default function PosTrx() {
     const [productList, setProductList] = useState<Product[]>([]);
+    const [productMaster, setProductMaster] = useState<Product[]>([]);
+    const [productSelect, setProductSelect] = useState<Item>();
     const txtSearch = useRef<any>(null);
     const [user, setUser] = useState<User | null>(null);
     const [trx, setTrx] = useState<Trx>();
     const [items, setItems] = useState<Item[]>([]);
+    const [searchInput, setSearchInput] = useState('');
+    const [mode, setMode] = useState('');
 
     useEffect(() => {
         const ref = refProduct();
@@ -54,6 +62,8 @@ export default function PosTrx() {
         } else {
             console.log("lanjut trx");
             setTrx(existTrx);
+            const existItems = localGet('@items');
+            setItems(existItems);
         }
     }
 
@@ -97,13 +107,36 @@ export default function PosTrx() {
             df.stockMin = Number(df.stockMin);
             data.push(df);
             })
-            console.log(data);
+            //console.log(data);
             setProductList(data);
+            setProductMaster(data);
             
         }).catch((reason) => {
             console.log(reason);
             
         })
+    }
+
+    const searching = async() => {
+        console.log("trigger search");
+        
+        if (searchInput == '') {
+             setProductList(productMaster);
+            return;
+        }
+        try {
+            if (productMaster.length != 0) {
+                let resultSearch1 = productMaster.filter(data => data.productName.toLowerCase().includes(searchInput.toLowerCase()));
+                let resultSearch2 = productMaster.filter(data => data.productId.includes(searchInput));
+                
+                let resultSearch3 = resultSearch1.concat(resultSearch2);
+                
+                setProductList(resultSearch3);
+            }
+            
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     const saveItem = async (newItem : Item) => {
@@ -194,52 +227,92 @@ export default function PosTrx() {
             newItem.branchId = (trx) ? trx.branchId : '';
             saveItem(newItem);
 
-            ToastSweet('info','Ditambahkan ke cart ' + data.productName)
+            ToastSweet('success','Tambah ' + data.productName)
         }
 
         return (
             <a href="#" onClick={addToCart}>
-            <Paper style={{padding:5}} square>
-            <Grid container>
-                <Grid item xs={12} md={4} xl={4}>
-                { data.productId }
-                </Grid>
-                <Grid item xs={12} md={4} xl={4}>
+            <MenuItem>
+                <ListItemIcon>
+                    <FontAwesomeIcon icon={'plus-circle'} color={'green'}/>
+                </ListItemIcon>
+                <ListItemText>
+                { data.productId } <br />
                 { data.productName }
-                </Grid>
-                <Grid item xs={12} md={4} xl={4} style={{textAlign:'right'}}>
-                { data.price }
-                </Grid>
-            </Grid>
-            </Paper>
-            
+                </ListItemText>
+                <Typography variant="body2" color="text.secondary" textAlign={"right"}>
+                { formatCcy(data.price) }
+                </Typography>
+            </MenuItem>
+            <Divider/>
             </a>
         )
     }
 
     const ViewItem = ({data} : { data : Item}) => {
+
+        const selectItem = () => {
+            console.log('Select Item');
+            
+            setMode('PRODUCT');
+            setProductSelect(data);
+        }
+
         return (
-            <a href="#">
-            <Paper style={{padding:5}} square>
-            <Grid container>
-                <Grid item xs={12} md={6} xl={6}>
-                { data.productName }
-                </Grid>
-                <Grid item xs={12} md={6} xl={6} style={{textAlign:'right'}}>
-                { data.price }
-                </Grid>
-            </Grid>
-            <Grid container>
-                <Grid item xs={12} md={6} xl={6}>
+            <a href="#" onClick={selectItem}>
+            <MenuItem>
+                <ListItemIcon>
+                    <FontAwesomeIcon icon={'pencil-alt'} />
+                </ListItemIcon>
+                <ListItemText>
+                { data.productName } <br />
                 X { data.qty }
-                </Grid>
-                <Grid item xs={12} md={6} xl={6} style={{textAlign:'right'}}>
-                { data.total }
-                </Grid>
-            </Grid>
-            </Paper>
+                </ListItemText>
+                <Typography variant="body2" color="text.secondary" textAlign={"right"}>
+                { formatCcy(data.price) } <br />
+                { formatCcy(data.total) }
+                </Typography>
+            </MenuItem>
             
             </a>
+        )
+    }
+
+    const EditItem = () => {
+
+        const closeEdit = () => {
+            setMode('');
+            setProductSelect(undefined);
+        }
+
+        return (
+            <div>
+            <Card style={{padding:5}}>
+            <Grid container>
+                <Grid item xs={12} md={6} xl={6}>
+                { productSelect?.productName }
+                </Grid>
+                <Grid item xs={12} md={6} xl={6} style={{textAlign:'right'}}>
+                    <a href="#" onClick={closeEdit}>
+                        <Button variant="outlined">
+                            <FontAwesomeIcon icon={'close'}/>
+                        </Button>
+                    </a>
+                </Grid>
+            </Grid>
+            <Divider/>
+            Harga
+            <Grid container spacing={2}>
+                <Grid item xs={12} md={6} xl={6}>
+                <Button variant="contained" color="success" fullWidth> <FontAwesomeIcon icon={'save'}/> Simpan </Button>
+                </Grid>
+                <Grid item xs={12} md={6} xl={6} style={{textAlign:'right'}}>
+                <Button variant="outlined" color="error" fullWidth> <FontAwesomeIcon icon={'trash-alt'}/> Hapus </Button>
+                </Grid>
+            </Grid>
+            </Card>
+            
+            </div>
         )
     }
     
@@ -260,15 +333,18 @@ export default function PosTrx() {
                     <TextField id="outlined-basic" 
                     fullWidth
                     label="Pencarian"
+                    value={searchInput}
+                    onChange={(e) => { setSearchInput(e.currentTarget.value )}}
+                    onKeyUp={(e) => { searching() }}
                     ref={txtSearch}
                     placeholder="Nama Produk / Barcode Produk"
                     variant="outlined" />
                 </Grid>
                 <Grid item xs={12} md={3} xl={3}>
                     <fieldset className="border border-solid border-gray-300 p-3">
-                        <legend className="text-sm">TOTAL</legend>
+                        <legend className="text-sm">Items ( { items.length } ) ------ Qty ( { formatCcy(trx?.trxQty) } ) </legend>
                         <Typography variant="h4" textAlign={'right'} component="h4">
-                            Rp {trx?.trxTotal}
+                            Rp{ formatCcy(trx?.trxTotal) }
                         </Typography>
                     </fieldset>
                 </Grid>
@@ -276,24 +352,27 @@ export default function PosTrx() {
 
             <Grid container spacing={2}>
                 <Grid item xs={12} md={3} xl={3}>
+
                     <Card>
+                    
+
                         <MenuList>
                             <MenuItem>
                             <ListItemIcon>
-                                <ContentCopy fontSize="small" />
+                                <SaveIcon fontSize="small" />
                             </ListItemIcon>
-                            <ListItemText>Copy</ListItemText>
+                            <ListItemText>Simpan</ListItemText>
                             <Typography variant="body2" color="text.secondary">
-                                ⌘C
+                                ⌘S
                             </Typography>
                             </MenuItem>
                             <MenuItem>
                             <ListItemIcon>
-                                <ContentPaste fontSize="small" />
+                                <PrintIcon fontSize="small" />
                             </ListItemIcon>
-                            <ListItemText>Paste</ListItemText>
+                            <ListItemText>Cetak</ListItemText>
                             <Typography variant="body2" color="text.secondary">
-                                ⌘V
+                                ⌘P
                             </Typography>
                             </MenuItem>
                             <Divider />
@@ -320,22 +399,36 @@ export default function PosTrx() {
                     </Card>
                 </Grid>
                 <Grid item xs={12} md={6} xl={6}>
-                    <List>
+                    { (mode == '') && <div>
+                    <Grid container>
+                        <Grid item xs={12} md={6} xl={6}>
+
+                        </Grid>
+                        <Grid item xs={12} md={6} xl={6} textAlign={"right"}>
+                            <i>Menampilkan { productList.length } dari total { productMaster.length }</i>
+                        </Grid>
+                    </Grid>
+                    <Card style={{maxHeight:'75vh', overflow:'scroll'}}>
                     {
                         productList.map((val, i) => {
                             return <ViewProduct key={i} data={val} />
                         })
                     }
-                    </List>
+                    </Card>
+                    </div>
+                    }
+                    { (mode == 'PRODUCT') && <div>
+                        <EditItem/>
+                    </div> }
                 </Grid>
                 <Grid item xs={12} md={3} xl={3}>
-                    <List>
+                    <Card style={{maxHeight:'75vh', overflow:'scroll'}}>
                     {
                         items.map((val, i) => {
                             return <ViewItem key={i} data={val} />
                         })
                     }
-                    </List>
+                    </Card>
                 </Grid>
             </Grid>
         </>
