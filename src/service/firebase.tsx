@@ -28,9 +28,16 @@ export const AUTH = getAuth(APP);
 
 export function refProduct() {
   const user = localGet('@user');
-  console.log(user);
+  
   
   return 'Company/' + user.companyId + '/Branch/' + user.branchId + '/Products';
+}
+
+export function refItems() {
+  const user = localGet('@user');
+  
+  
+  return 'Company/' + user.companyId + '/Items';
 }
 
 export function getSessionUser() : User {

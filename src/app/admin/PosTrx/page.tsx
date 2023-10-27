@@ -1,8 +1,5 @@
 "use client"
-import ContentPaste from "@mui/icons-material/ContentPaste";
-import Cloud from '@mui/icons-material/Cloud';
-import ContentCopy from '@mui/icons-material/ContentCopy';
-import ContentCut from '@mui/icons-material/ContentCut';
+
 import Card from "@mui/material/Card";
 import Divider from "@mui/material/Divider";
 import Grid from "@mui/material/Grid";
@@ -16,12 +13,11 @@ import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import SaveIcon from '@mui/icons-material/Save';
 import PrintIcon from '@mui/icons-material/Print';
-import SettingsIcon from '@mui/icons-material/Settings';
-import { DB, getSessionUser, refProduct } from "@/service/firebase";
+import { DB, getSessionUser, refItems, refProduct } from "@/service/firebase";
 import { useEffect, useRef, useState } from "react";
-import { DocumentData, collection, getDocs } from "firebase/firestore";
+import { DocumentData, collection, doc, getDocs, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { Item, Product, Trx, User } from "@/service/model";
-import { Button, CardContent, List, ListItem, Paper } from "@mui/material";
+import { Button, CardContent, Input, List, ListItem, Paper } from "@mui/material";
 import Link from "next/link";
 import { AlertSweet, ToastSweet, formatCcy, localGet, localSave, makeId } from "@/service/helper";
 import MOMENT from 'moment';
@@ -32,13 +28,14 @@ var sumBy = require('lodash/sumBy');
 export default function PosTrx() {
     const [productList, setProductList] = useState<Product[]>([]);
     const [productMaster, setProductMaster] = useState<Product[]>([]);
-    const [productSelect, setProductSelect] = useState<Item>();
+    const [itemSelect, setItemSelect] = useState<Item>();
     const txtSearch = useRef<any>(null);
     const [user, setUser] = useState<User | null>(null);
     const [trx, setTrx] = useState<Trx>();
     const [items, setItems] = useState<Item[]>([]);
     const [searchInput, setSearchInput] = useState('');
     const [mode, setMode] = useState('');
+    const [qty, setQty] = useState(0);
 
     useEffect(() => {
         const ref = refProduct();
@@ -184,6 +181,62 @@ export default function PosTrx() {
         
     }
 
+    const delItem = async(d : Item | undefined) => {
+        try {
+            
+            // const user = getLocal('@user');
+            // const ref = await refItems();
+            
+            // FIRESTORE().collection(ref).doc(data.id).delete().then(Oke => {
+            //     //notif('Item dihapus ' + data.productName);
+                
+            // }).catch(err => {
+            //     Alert.alert('ERR.TRX.288', err.message);
+            // });
+            var indexItem = findIndex(items, { id : d?.id});
+            
+            items.splice(indexItem, 1);
+            await removeItemDb(d?.id);
+            //actionItem.current?.hide();
+            setItemSelect(undefined);
+            setMode('');
+            ToastSweet('success','Item dihapus ' + d?.productName);
+            calculateItem();
+        } catch (error) {
+            console.log(error);
+            
+            //Alert.alert('ERR.TRX.291', error);
+        }
+    }
+
+    const removeItemDb = async(id : string | undefined) => {
+
+        try {
+            const ref = refItems();
+            console.log('hapus');
+            console.log(ref);
+            
+            const refDoc = doc(DB, ref + '/' + id);
+            deleteDoc(refDoc).catch((reason) => {
+                console.log(reason);
+                
+            }).catch((err) => {
+                console.log(err);
+                
+            }).finally(() => {
+                console.log("selesai");
+                
+            })
+            console.log("EOITDB");
+            
+    
+        } catch (error) {
+            console.log(error);
+            //Alert.alert('ERR.SP.197', error);
+            
+        }
+    }
+
     const ViewProduct = ({data} : { data : Product}) => {
         const addToCart = async() => {
             //setProduct(data);
@@ -255,7 +308,8 @@ export default function PosTrx() {
             console.log('Select Item');
             
             setMode('PRODUCT');
-            setProductSelect(data);
+            setItemSelect(data);
+            setQty(data.qty);
         }
 
         return (
@@ -278,11 +332,24 @@ export default function PosTrx() {
         )
     }
 
+    const changeQty = (val : any) => {
+        //console.log(val);
+        setQty(val);
+        if (itemSelect) {
+            itemSelect.qty = val;
+            itemSelect.subTotal = itemSelect.price * val;
+            itemSelect.total = itemSelect.subTotal - itemSelect.disc;    
+        }
+        
+        //console.log(item);
+        
+    }
+
     const EditItem = () => {
 
         const closeEdit = () => {
             setMode('');
-            setProductSelect(undefined);
+            setItemSelect(undefined);
         }
 
         return (
@@ -290,7 +357,7 @@ export default function PosTrx() {
             <Card style={{padding:5}}>
             <Grid container>
                 <Grid item xs={12} md={6} xl={6}>
-                { productSelect?.productName }
+                { itemSelect?.productName }
                 </Grid>
                 <Grid item xs={12} md={6} xl={6} style={{textAlign:'right'}}>
                     <a href="#" onClick={closeEdit}>
@@ -301,13 +368,54 @@ export default function PosTrx() {
                 </Grid>
             </Grid>
             <Divider/>
-            Harga
+
+            <Grid container spacing={2}>
+                <Grid item xs={12} md={6} xl={6}> 
+                    <br/>
+                    <Grid container>
+                        <Grid item xs={12} md={6} xl={6}>Harga </Grid>
+                        <Grid item xs={12} md={6} xl={6} textAlign={'right'}>{ formatCcy(itemSelect?.price) } </Grid>
+                    </Grid>
+                    <Grid container>
+                        <Grid item xs={12} md={6} xl={6}>Total </Grid>
+                        <Grid item xs={12} md={6} xl={6} textAlign={'right'}>{ (itemSelect?.price) ? formatCcy(itemSelect?.price * qty) : 0 } </Grid>
+                    </Grid>
+                    
+                    <br/>
+                    <br/>
+                </Grid>
+                <Grid item xs={12} md={6} xl={6}> 
+                    <TextField 
+                        label="Qty" 
+                        value={qty}
+                        onChange={(x) => { changeQty(x.currentTarget.value )}}
+                        variant="outlined" 
+                        fullWidth 
+                        type="number" 
+                        placeholder="0.00" />
+                </Grid>
+            </Grid>
+
             <Grid container spacing={2}>
                 <Grid item xs={12} md={6} xl={6}>
-                <Button variant="contained" color="success" fullWidth> <FontAwesomeIcon icon={'save'}/> Simpan </Button>
+                <Button 
+                    onClick={() => {
+                        if (itemSelect) {
+                            ToastSweet('success','Diupdate ' + itemSelect.productName)
+                            saveItem(itemSelect);
+                            setMode('');
+                            setItemSelect(undefined);
+                        }
+                    }}
+                    variant="contained" 
+                    color="success" 
+                    fullWidth> <FontAwesomeIcon icon={'save'}/> Simpan </Button>
                 </Grid>
                 <Grid item xs={12} md={6} xl={6} style={{textAlign:'right'}}>
-                <Button variant="outlined" color="error" fullWidth> <FontAwesomeIcon icon={'trash-alt'}/> Hapus </Button>
+                <Button 
+                variant="outlined" 
+                onClick={ () => { delItem(itemSelect)}}
+                color="error" fullWidth> <FontAwesomeIcon icon={'trash-alt'}/> Hapus </Button>
                 </Grid>
             </Grid>
             </Card>
