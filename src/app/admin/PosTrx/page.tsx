@@ -19,11 +19,12 @@ import { DocumentData, collection, doc, getDocs, setDoc, updateDoc, deleteDoc } 
 import { Item, Product, Trx, User } from "@/service/model";
 import { Button, CardContent, Input, List, ListItem, Paper } from "@mui/material";
 import Link from "next/link";
-import { AlertSweet, ToastSweet, formatCcy, localGet, localSave, makeId } from "@/service/helper";
+import { AlertSweet, ToastSweet, formatCcy, localGet, localRemove, localSave, makeId } from "@/service/helper";
 import MOMENT from 'moment';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ComSkeleton from "@/component/skeleton";
 import ComEmpty from "@/component/comEmpty";
+import { useRouter } from "next/navigation";
 var findIndex = require('lodash/findIndex');
 var sumBy = require('lodash/sumBy');
 
@@ -39,6 +40,7 @@ export default function PosTrx() {
     const [mode, setMode] = useState('');
     const [qty, setQty] = useState(0);
     const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
     useEffect(() => {
         const ref = refProduct();
@@ -441,6 +443,14 @@ export default function PosTrx() {
             setItems([]); 
         }
     }
+
+    const cancel = async() => {
+        localRemove('@trx');
+        localRemove('@items');
+        router.push('/admin');
+        console.log('cancel');
+        
+    }
     
     return (
         <>
@@ -512,9 +522,12 @@ export default function PosTrx() {
                             </Typography>
                             </MenuItem>
 
-                            <MenuItem style={{backgroundColor:'#FF5733', color:'#ffffff'}}>
+                            <MenuItem 
+                            onClick={cancel}
+                            style={{backgroundColor:'#FF5733', color:'#ffffff'}}>
                             <ListItemIcon>
-                                <DeleteForeverIcon fontSize="small" style={{color:'#ffffff'}}/>
+                                
+                                <FontAwesomeIcon icon={'trash-alt'} color="#ffffff"/>
                             </ListItemIcon>
                             <ListItemText>Batal</ListItemText>
                             <Typography variant="body2" color="#ffffff">
