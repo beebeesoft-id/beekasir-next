@@ -60,4 +60,5 @@ export interface Item {
     total: number,
     trxId:  string,
     branchId:  string,
+    createdDate : string,
 }

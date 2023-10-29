@@ -1,9 +1,9 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection } from 'firebase/firestore'
+import { getFirestore, collection, writeBatch, doc, setDoc } from 'firebase/firestore'
 import { getAuth } from 'firebase/auth'
-import { localGet } from "./helper";
-import { User } from "./model";
+import { localGet, localRemove, today } from "./helper";
+import { Item, Trx, User } from "./model";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -33,6 +33,13 @@ export function refProduct() {
   return 'Company/' + user.companyId + '/Branch/' + user.branchId + '/Products';
 }
 
+export function refTrx() {
+  const user = localGet('@user');
+  
+  
+  return 'Company/' + user.companyId + '/Transactions';
+}
+
 export function refItems() {
   const user = localGet('@user');
   
@@ -44,4 +51,47 @@ export function getSessionUser() : User {
   const user = localGet('@user');
   
   return user;
+}
+
+export const submitTransaction = async() => {
+
+  try {
+      const ref1 = refTrx();
+      var data : Trx = localGet('@trx');
+      
+      const trx = doc(DB, ref1 + '/' + data.trxId);
+      
+      const saveTrx = await setDoc(trx, data);
+      console.log(saveTrx);
+
+      submitItems();
+      localRemove('@trx');;
+    return true;
+  } catch (error) {
+      console.log(error);
+      return false;
+  }
+}
+
+export const submitItems = async() => {
+
+  try {
+
+      const ref2 = refItems();
+      var newItems = [];
+      newItems = localGet('@items');
+
+      const batch = writeBatch(DB);
+      newItems.forEach( (d : Item) => {
+          const item = doc(DB, ref2 + '/' + d.id);
+          d.createdDate = today();
+          batch.set(item, d);
+      });
+      batch.commit();
+      localRemove('@items');
+
+  } catch (error) {
+      console.log(error);
+      return false;
+  }
 }

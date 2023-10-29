@@ -13,7 +13,7 @@ import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import SaveIcon from '@mui/icons-material/Save';
 import PrintIcon from '@mui/icons-material/Print';
-import { DB, getSessionUser, refItems, refProduct } from "@/service/firebase";
+import { DB, getSessionUser, refItems, refProduct, submitTransaction } from "@/service/firebase";
 import { useEffect, useRef, useState } from "react";
 import { DocumentData, collection, doc, getDocs, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { Item, Product, Trx, User } from "@/service/model";
@@ -22,6 +22,8 @@ import Link from "next/link";
 import { AlertSweet, ToastSweet, formatCcy, localGet, localSave, makeId } from "@/service/helper";
 import MOMENT from 'moment';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ComSkeleton from "@/component/skeleton";
+import ComEmpty from "@/component/comEmpty";
 var findIndex = require('lodash/findIndex');
 var sumBy = require('lodash/sumBy');
 
@@ -36,6 +38,7 @@ export default function PosTrx() {
     const [searchInput, setSearchInput] = useState('');
     const [mode, setMode] = useState('');
     const [qty, setQty] = useState(0);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const ref = refProduct();
@@ -60,7 +63,9 @@ export default function PosTrx() {
             console.log("lanjut trx");
             setTrx(existTrx);
             const existItems = localGet('@items');
-            setItems(existItems);
+            if (existItems) {
+                setItems(existItems);    
+            }
         }
     }
 
@@ -93,7 +98,7 @@ export default function PosTrx() {
         const ref = collection(DB, link);
         let data: Product[] = [];
         
-        
+        setLoading(true);
         return getDocs(ref).then((resp) => {
             
             resp.forEach((d) => {
@@ -107,10 +112,10 @@ export default function PosTrx() {
             //console.log(data);
             setProductList(data);
             setProductMaster(data);
-            
+            setLoading(false);
         }).catch((reason) => {
             console.log(reason);
-            
+            setLoading(false);
         })
     }
 
@@ -256,6 +261,7 @@ export default function PosTrx() {
                 total:0,
                 trxId: '',
                 branchId: '',
+                createdDate:'',
             }
             const id = trx?.trxId + data.productId;
             const existItem = items.filter(x => x.id == id);
@@ -423,6 +429,18 @@ export default function PosTrx() {
             </div>
         )
     }
+
+    const savePesan = async() => {
+        if (items.length == 0) {
+            AlertSweet('info','Info','Tidak ada Item untuk disimpan');
+        } else {
+            await submitTransaction();
+            setMode('');
+            AlertSweet('success','Tersimpan','Pesanan transaksi disimpan.');
+            initTrx();
+            setItems([]); 
+        }
+    }
     
     return (
         <>
@@ -465,7 +483,7 @@ export default function PosTrx() {
                     
 
                         <MenuList>
-                            <MenuItem>
+                            <MenuItem onClick={savePesan}>
                             <ListItemIcon>
                                 <SaveIcon fontSize="small" />
                             </ListItemIcon>
@@ -507,6 +525,7 @@ export default function PosTrx() {
                     </Card>
                 </Grid>
                 <Grid item xs={12} md={6} xl={6}>
+                    { (loading) && <ComSkeleton /> }
                     { (mode == '') && <div>
                     <Grid container>
                         <Grid item xs={12} md={6} xl={6}>
@@ -528,6 +547,7 @@ export default function PosTrx() {
                     { (mode == 'PRODUCT') && <div>
                         <EditItem/>
                     </div> }
+                    
                 </Grid>
                 <Grid item xs={12} md={3} xl={3}>
                     <Card style={{maxHeight:'75vh', overflow:'scroll'}}>
@@ -537,6 +557,9 @@ export default function PosTrx() {
                         })
                     }
                     </Card>
+                    {
+                        (items.length == 0) && <ComEmpty/>
+                    }
                 </Grid>
             </Grid>
         </>

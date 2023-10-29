@@ -1,4 +1,5 @@
 import Swal from 'sweetalert2'
+import MOMENT from 'moment'
 
 var _ = require('lodash');
 
@@ -48,6 +49,10 @@ export function ToastSweet(status:string | any, title:string) {
         toast: true,
         showConfirmButton:false
       });
+}
+
+export function localRemove(key : string) {
+    localStorage.removeItem(key);
 }
 
 export function localSave(key: string, value:any) {
@@ -123,4 +128,8 @@ export function makeId(length : number) {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
    }
    return result;
+}
+
+export function today() {
+    return MOMENT().format("YYYY-MM-DD HH:mm:ss");
 }
