@@ -9,15 +9,11 @@ import MenuItem from "@mui/material/MenuItem";
 import MenuList from "@mui/material/MenuList";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import SaveIcon from '@mui/icons-material/Save';
-import PrintIcon from '@mui/icons-material/Print';
 import { DB, getSessionUser, refItems, refProduct, submitTransaction } from "@/service/firebase";
 import { useEffect, useRef, useState } from "react";
 import { DocumentData, collection, doc, getDocs, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { Item, Product, Trx, User } from "@/service/model";
-import { Button, CardContent, Input, List, ListItem, Paper } from "@mui/material";
+import { Button, CardActions, CardContent, CardHeader, Input, List, ListItem, Paper } from "@mui/material";
 import Link from "next/link";
 import { AlertSweet, ToastSweet, formatCcy, localGet, localRemove, localSave, makeId } from "@/service/helper";
 import MOMENT from 'moment';
@@ -25,6 +21,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ComSkeleton from "@/component/skeleton";
 import ComEmpty from "@/component/comEmpty";
 import { useRouter } from "next/navigation";
+import { faMoneyBillTransfer } from "@fortawesome/free-solid-svg-icons";
 var findIndex = require('lodash/findIndex');
 var sumBy = require('lodash/sumBy');
 
@@ -41,6 +38,7 @@ export default function PosTrx() {
     const [qty, setQty] = useState(0);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+    const [paymentType, setPaymentType] = useState('');
 
     useEffect(() => {
         const ref = refProduct();
@@ -444,6 +442,14 @@ export default function PosTrx() {
         }
     }
 
+    const paymentShow = async() => {
+        if (items.length == 0) {
+            AlertSweet('info','Info','Tidak ada Item untuk disimpan');
+        } else {
+            setMode('PAY');
+        }
+    }
+
     const cancel = async() => {
         localRemove('@trx');
         localRemove('@items');
@@ -451,6 +457,94 @@ export default function PosTrx() {
         console.log('cancel');
         
     }
+
+    function ComPayment() {
+        const closePayment = () => {
+            setMode('');
+        }
+
+        const selectPayment = (type : string) => {
+            setPaymentType(type);
+        }
+
+        return (
+          <>
+            <Card>
+                <CardHeader 
+                title="Pilihan Pembayaran"
+                action={
+                    <Button onClick={closePayment} variant="outlined">
+                        <FontAwesomeIcon icon={'close'}/>
+                    </Button>
+                }
+                />
+                <CardContent>
+                    <fieldset className="border border-solid border-gray-300 p-3">
+                        <legend className="text-sm">
+                            Total Tagihan
+                        </legend>
+                        <Typography variant="h4" textAlign={'right'} component="h4">
+                            Rp{ formatCcy(trx?.trxTotal) }
+                        </Typography>
+                    </fieldset>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} md={6} xl={6}>
+                            <MenuList>
+                                <Divider/>
+                                <MenuItem onClick={() => { selectPayment('CASH') }}>
+                                    <ListItemIcon>
+                                        <FontAwesomeIcon icon={"sack-dollar"}/>
+                                    </ListItemIcon>
+                                    <ListItemText>
+                                        Tunai
+                                    </ListItemText>
+                                    <Typography variant="body2" color="text.secondary">
+                                        { (paymentType == 'CASH') && <FontAwesomeIcon icon={"check-circle"}/> }
+                                    </Typography>
+                                </MenuItem>
+                                <Divider/>
+                                <MenuItem onClick={() => { selectPayment('TRANSFER') }}>
+                                    <ListItemIcon>
+                                        <FontAwesomeIcon icon={faMoneyBillTransfer}/>
+                                    </ListItemIcon>
+                                    <ListItemText>
+                                        Transfer
+                                    </ListItemText>
+                                    <Typography variant="body2" color="text.secondary">
+                                        { (paymentType == 'TRANSFER') && <FontAwesomeIcon icon={"check-circle"}/> }
+                                    </Typography>
+                                </MenuItem>
+                                <Divider/>
+                                <MenuItem onClick={() => { selectPayment('QRIS') }}>
+                                    <ListItemIcon>
+                                        <FontAwesomeIcon icon={"qrcode"}/>
+                                    </ListItemIcon>
+                                    <ListItemText>
+                                        QRIS
+                                    </ListItemText>
+                                    <Typography variant="body2" color="text.secondary">
+                                        { (paymentType == 'QRIS') && <FontAwesomeIcon icon={"check-circle"}/> }
+                                    </Typography>
+                                </MenuItem>
+                                <Divider/>
+                            </MenuList>
+                        </Grid>
+                        <Grid item xs={12} md={6} xl={6}>
+                        { (paymentType == 'CASH') && <div>
+                            Pembayaran Tunai
+                        </div> }
+                        </Grid>
+                    </Grid>
+                </CardContent>
+                <CardActions>
+                    <Button onClick={closePayment} variant="contained" fullWidth>
+                        <FontAwesomeIcon icon={'money-bill-1-wave'}/> Simpan Pembayaran
+                    </Button>
+                </CardActions>
+            </Card>
+          </>
+        )
+    }    
     
     return (
         <>
@@ -464,30 +558,6 @@ export default function PosTrx() {
                         </Grid>
 
                     </fieldset>
-                </Grid>
-                <Grid item xs={12} md={6} xl={6} style={{marginTop:10}}>
-                    <TextField id="outlined-basic" 
-                    fullWidth
-                    label="Pencarian"
-                    value={searchInput}
-                    onChange={(e) => { setSearchInput(e.currentTarget.value )}}
-                    onKeyUp={(e) => { searching() }}
-                    ref={txtSearch}
-                    placeholder="Nama Produk / Barcode Produk"
-                    variant="outlined" />
-                </Grid>
-                <Grid item xs={12} md={3} xl={3}>
-                    <fieldset className="border border-solid border-gray-300 p-3">
-                        <legend className="text-sm">Items ( { items.length } ) ------ Qty ( { formatCcy(trx?.trxQty) } ) </legend>
-                        <Typography variant="h4" textAlign={'right'} component="h4">
-                            Rp{ formatCcy(trx?.trxTotal) }
-                        </Typography>
-                    </fieldset>
-                </Grid>
-            </Grid>
-
-            <Grid container spacing={2}>
-                <Grid item xs={12} md={3} xl={3}>
 
                     <Card>
                     
@@ -495,7 +565,7 @@ export default function PosTrx() {
                         <MenuList>
                             <MenuItem onClick={savePesan}>
                             <ListItemIcon>
-                                <SaveIcon fontSize="small" />
+                                <FontAwesomeIcon icon={'floppy-disk'}/>
                             </ListItemIcon>
                             <ListItemText>Simpan</ListItemText>
                             <Typography variant="body2" color="text.secondary">
@@ -504,7 +574,7 @@ export default function PosTrx() {
                             </MenuItem>
                             <MenuItem>
                             <ListItemIcon>
-                                <PrintIcon fontSize="small" />
+                                <FontAwesomeIcon icon={'print'}/>
                             </ListItemIcon>
                             <ListItemText>Cetak</ListItemText>
                             <Typography variant="body2" color="text.secondary">
@@ -512,11 +582,13 @@ export default function PosTrx() {
                             </Typography>
                             </MenuItem>
                             <Divider />
-                            <MenuItem style={{backgroundColor:'#90EE90'}}>
+                            <MenuItem 
+                            onClick={paymentShow}
+                            style={{backgroundColor:'#90EE90'}}>
                             <ListItemIcon>
-                                <AddShoppingCartIcon fontSize="small" />
+                                <FontAwesomeIcon icon={'money-bill'}/>
                             </ListItemIcon>
-                            <ListItemText>Bayar</ListItemText>
+                            <ListItemText>Pilih Pembayaran</ListItemText>
                             <Typography variant="body2" color="text.secondary">
                                 Alt + P
                             </Typography>
@@ -537,7 +609,19 @@ export default function PosTrx() {
                         </MenuList>
                     </Card>
                 </Grid>
-                <Grid item xs={12} md={6} xl={6}>
+                <Grid item xs={12} md={6} xl={6} style={{marginTop:10}}>
+                    
+                    { (mode == '') && <TextField id="outlined-basic" 
+                        fullWidth
+                        label="Pencarian"
+                        value={searchInput}
+                        onChange={(e) => { setSearchInput(e.currentTarget.value )}}
+                        onKeyUp={(e) => { searching() }}
+                        ref={txtSearch}
+                        placeholder="Nama Produk / Barcode Produk"
+                        variant="outlined" />
+                    }
+
                     { (loading) && <ComSkeleton /> }
                     { (mode == '') && <div>
                     <Grid container>
@@ -560,9 +644,20 @@ export default function PosTrx() {
                     { (mode == 'PRODUCT') && <div>
                         <EditItem/>
                     </div> }
+
+                    { (mode == 'PAY') && <div>
+                        <ComPayment/>
+                    </div> }
                     
                 </Grid>
                 <Grid item xs={12} md={3} xl={3}>
+                    <fieldset className="border border-solid border-gray-300 p-3">
+                        <legend className="text-sm">Items ( { items.length } ) ------ Qty ( { formatCcy(trx?.trxQty) } ) </legend>
+                        <Typography variant="h4" textAlign={'right'} component="h4">
+                            Rp{ formatCcy(trx?.trxTotal) }
+                        </Typography>
+                    </fieldset>
+
                     <Card style={{maxHeight:'75vh', overflow:'scroll'}}>
                     {
                         items.map((val, i) => {
