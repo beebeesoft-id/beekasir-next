@@ -39,6 +39,7 @@ export default function PosTrx() {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
     const [paymentType, setPaymentType] = useState('');
+    const [amount, setAmount] = useState(0);
 
     useEffect(() => {
         const ref = refProduct();
@@ -458,93 +459,24 @@ export default function PosTrx() {
         
     }
 
-    function ComPayment() {
-        const closePayment = () => {
-            setMode('');
-        }
+    const closePayment = () => {
+        setMode('');
+    }
 
-        const selectPayment = (type : string) => {
-            setPaymentType(type);
+    const selectPayment = (type : string) => {
+        setPaymentType(type);
+        if (type != 'CASH') {
+            if (trx?.trxTotal) {
+                setAmount(trx?.trxTotal);   
+            }
+        } else {
+            setAmount(0);
         }
+    }
 
-        return (
-          <>
-            <Card>
-                <CardHeader 
-                title="Pilihan Pembayaran"
-                action={
-                    <Button onClick={closePayment} variant="outlined">
-                        <FontAwesomeIcon icon={'close'}/>
-                    </Button>
-                }
-                />
-                <CardContent>
-                    <fieldset className="border border-solid border-gray-300 p-3">
-                        <legend className="text-sm">
-                            Total Tagihan
-                        </legend>
-                        <Typography variant="h4" textAlign={'right'} component="h4">
-                            Rp{ formatCcy(trx?.trxTotal) }
-                        </Typography>
-                    </fieldset>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} md={6} xl={6}>
-                            <MenuList>
-                                <Divider/>
-                                <MenuItem onClick={() => { selectPayment('CASH') }}>
-                                    <ListItemIcon>
-                                        <FontAwesomeIcon icon={"sack-dollar"}/>
-                                    </ListItemIcon>
-                                    <ListItemText>
-                                        Tunai
-                                    </ListItemText>
-                                    <Typography variant="body2" color="text.secondary">
-                                        { (paymentType == 'CASH') && <FontAwesomeIcon icon={"check-circle"}/> }
-                                    </Typography>
-                                </MenuItem>
-                                <Divider/>
-                                <MenuItem onClick={() => { selectPayment('TRANSFER') }}>
-                                    <ListItemIcon>
-                                        <FontAwesomeIcon icon={faMoneyBillTransfer}/>
-                                    </ListItemIcon>
-                                    <ListItemText>
-                                        Transfer
-                                    </ListItemText>
-                                    <Typography variant="body2" color="text.secondary">
-                                        { (paymentType == 'TRANSFER') && <FontAwesomeIcon icon={"check-circle"}/> }
-                                    </Typography>
-                                </MenuItem>
-                                <Divider/>
-                                <MenuItem onClick={() => { selectPayment('QRIS') }}>
-                                    <ListItemIcon>
-                                        <FontAwesomeIcon icon={"qrcode"}/>
-                                    </ListItemIcon>
-                                    <ListItemText>
-                                        QRIS
-                                    </ListItemText>
-                                    <Typography variant="body2" color="text.secondary">
-                                        { (paymentType == 'QRIS') && <FontAwesomeIcon icon={"check-circle"}/> }
-                                    </Typography>
-                                </MenuItem>
-                                <Divider/>
-                            </MenuList>
-                        </Grid>
-                        <Grid item xs={12} md={6} xl={6}>
-                        { (paymentType == 'CASH') && <div>
-                            Pembayaran Tunai
-                        </div> }
-                        </Grid>
-                    </Grid>
-                </CardContent>
-                <CardActions>
-                    <Button onClick={closePayment} variant="contained" fullWidth>
-                        <FontAwesomeIcon icon={'money-bill-1-wave'}/> Simpan Pembayaran
-                    </Button>
-                </CardActions>
-            </Card>
-          </>
-        )
-    }    
+    const changeAmount = (inputAmount : any) => {
+        setAmount(inputAmount);
+    }
     
     return (
         <>
@@ -646,13 +578,104 @@ export default function PosTrx() {
                     </div> }
 
                     { (mode == 'PAY') && <div>
-                        <ComPayment/>
+                    <Card>
+                        <CardHeader 
+                        title="Pilihan Pembayaran"
+                        action={
+                            <Button onClick={closePayment} variant="outlined">
+                                <FontAwesomeIcon icon={'close'}/>
+                            </Button>
+                        }
+                        />
+                        <CardContent>
+                            <fieldset className="border border-solid border-gray-300 p-3">
+                                <legend className="text-sm">
+                                    Kembalian
+                                </legend>
+                                <Typography variant="h4" textAlign={'right'} component="h4">
+                                    Rp{ (trx?.trxTotal) ? formatCcy(amount - trx?.trxTotal) : 0 }
+                                </Typography>
+                            </fieldset>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} md={6} xl={6}>
+                                    <MenuList>
+                                        <Divider/>
+                                        <MenuItem onClick={() => { selectPayment('CASH') }}>
+                                            <ListItemIcon>
+                                                <FontAwesomeIcon icon={"sack-dollar"}/>
+                                            </ListItemIcon>
+                                            <ListItemText>
+                                                Tunai
+                                            </ListItemText>
+                                            <Typography variant="body2" color="text.secondary">
+                                                { (paymentType == 'CASH') && <FontAwesomeIcon icon={"check-circle"}/> }
+                                            </Typography>
+                                        </MenuItem>
+                                        <Divider/>
+                                        <MenuItem onClick={() => { selectPayment('TRANSFER') }}>
+                                            <ListItemIcon>
+                                                <FontAwesomeIcon icon={faMoneyBillTransfer}/>
+                                            </ListItemIcon>
+                                            <ListItemText>
+                                                Transfer
+                                            </ListItemText>
+                                            <Typography variant="body2" color="text.secondary">
+                                                { (paymentType == 'TRANSFER') && <FontAwesomeIcon icon={"check-circle"}/> }
+                                            </Typography>
+                                        </MenuItem>
+                                        <Divider/>
+                                        <MenuItem onClick={() => { selectPayment('QRIS') }}>
+                                            <ListItemIcon>
+                                                <FontAwesomeIcon icon={"qrcode"}/>
+                                            </ListItemIcon>
+                                            <ListItemText>
+                                                QRIS
+                                            </ListItemText>
+                                            <Typography variant="body2" color="text.secondary">
+                                                { (paymentType == 'QRIS') && <FontAwesomeIcon icon={"check-circle"}/> }
+                                            </Typography>
+                                        </MenuItem>
+                                        <Divider/>
+                                    </MenuList>
+                                </Grid>
+                                <Grid item xs={12} md={6} xl={6} style={{marginTop:5}}>
+                                { (paymentType == 'CASH') && <div >
+                                    <TextField id="outlined-basic" 
+                                    label="Nominal" 
+                                    variant="outlined"
+                                    value={amount}
+                                    type="number"
+                                    onChange={(x) => { changeAmount(x.currentTarget.value)}}
+                                    fullWidth
+                                    placeholder="Rp0" />
+                                </div> }
+
+                                { (paymentType == 'TRANSFER') && <div >
+                                    1. Transfer Manual ke Rekening Outlet. <br />
+                                    2. Nominal Pembayaran sesuai Tagihan <br />
+                                    3. Cek pembayaran di saldo Rekening Outlet.
+                                </div> }
+
+                                { (paymentType == 'QRIS') && <div >
+                                    1. Scan menggunakan QRIS yang ada di outlet. <br />
+                                    2. Nominal Pembayaran sesuai Tagihan <br />
+                                    3. Cek pembayaran di saldo QRIS Outlet.
+                                </div> }
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                        <CardActions>
+                            <Button onClick={closePayment} variant="contained" fullWidth>
+                                <FontAwesomeIcon icon={'money-bill-1-wave'}/> Simpan Pembayaran
+                            </Button>
+                        </CardActions>
+                    </Card>
                     </div> }
                     
                 </Grid>
                 <Grid item xs={12} md={3} xl={3}>
                     <fieldset className="border border-solid border-gray-300 p-3">
-                        <legend className="text-sm">Items ( { items.length } ) ------ Qty ( { formatCcy(trx?.trxQty) } ) </legend>
+                        <legend className="text-sm">Items ( { items.length } ) ------ Qty ( { formatCcy(trx?.trxQty) } ) ----- TOTAL TAGIHAN</legend>
                         <Typography variant="h4" textAlign={'right'} component="h4">
                             Rp{ formatCcy(trx?.trxTotal) }
                         </Typography>
