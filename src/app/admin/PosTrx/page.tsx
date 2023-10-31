@@ -11,7 +11,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { DB, getSessionUser, refItems, refProduct, submitTransaction } from "@/service/firebase";
 import { useEffect, useRef, useState } from "react";
-import { DocumentData, collection, doc, getDocs, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import { DocumentData, collection, doc, getDocs, setDoc, updateDoc, deleteDoc, where, query } from "firebase/firestore";
 import { Item, Product, Trx, User } from "@/service/model";
 import { Button, CardActions, CardContent, CardHeader, Input, List, ListItem, Paper } from "@mui/material";
 import Link from "next/link";
@@ -42,10 +42,10 @@ export default function PosTrx() {
     const [amount, setAmount] = useState(0);
 
     useEffect(() => {
-        const ref = refProduct();
+        
         checkTrx();
         getSession();
-        getProduct(ref);
+        getProduct();
         txtSearch.current?.focus();
       return () => {
         
@@ -66,6 +66,8 @@ export default function PosTrx() {
             const existItems = localGet('@items');
             if (existItems) {
                 setItems(existItems);    
+            } else {
+                getItems(existTrx.trxId);
             }
         }
     }
@@ -95,24 +97,41 @@ export default function PosTrx() {
         setUser(tmpUser);
     }
 
-    const getProduct = async(link : string) => {
+    const getProduct = async() => {
+        const link = refProduct();
         const ref = collection(DB, link);
-        let data: Product[] = [];
         
         setLoading(true);
-        return getDocs(ref).then((resp) => {
-            
-            resp.forEach((d) => {
-            const df : any = d.data();
-            df.price = Number(df.price);
-            df.cost = Number(df.cost);
-            df.stockCrash = Number(df.stockCrash);
-            df.stockMin = Number(df.stockMin);
-            data.push(df);
-            })
-            //console.log(data);
+        return getDocs(ref).then((response) => {
+            let data : any = response.docs.map((d) => {
+                return d.data();
+            });
+
             setProductList(data);
             setProductMaster(data);
+            setLoading(false);
+        }).catch((reason) => {
+            console.log(reason);
+            setLoading(false);
+        })
+    }
+
+    const getItems = async(id : string) => {
+        const link = refItems();
+        const ref = query(collection(DB, link), where('trxId','==',id));
+        
+        //setLoading(true);
+        return getDocs(ref).then((response) => {
+            
+            let data : any = response.docs.map((d) => {
+                return d.data();
+            });
+            console.log(data);
+            if (data) {
+                setItems(data);
+                localSave('@items', data);    
+            }
+            
             setLoading(false);
         }).catch((reason) => {
             console.log(reason);
@@ -675,7 +694,7 @@ export default function PosTrx() {
                 </Grid>
                 <Grid item xs={12} md={3} xl={3}>
                     <fieldset className="border border-solid border-gray-300 p-3">
-                        <legend className="text-sm">Items ( { items.length } ) ------ Qty ( { formatCcy(trx?.trxQty) } ) ----- TOTAL TAGIHAN</legend>
+                        <legend className="text-sm">Items ( { items.length } ) --- Qty ( { formatCcy(trx?.trxQty) } ) --- TOTAL TAGIHAN</legend>
                         <Typography variant="h4" textAlign={'right'} component="h4">
                             Rp{ formatCcy(trx?.trxTotal) }
                         </Typography>
