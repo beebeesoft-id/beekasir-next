@@ -41,7 +41,8 @@ export interface Trx {
     trxQty : number,
     trxTotal : number,
     branchId : string,
-    note : string
+    note : string,
+    kembalian : number,
 }
 
 export interface Item {

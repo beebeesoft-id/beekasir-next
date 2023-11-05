@@ -61,8 +61,11 @@ export default function PosTrx() {
             console.log("Initial Trx");
             initTrx();
         } else {
-            console.log("lanjut trx");
+            console.log(existTrx);
             setTrx(existTrx);
+            if (existTrx.status == 'LUNAS') {
+                setMode('LUNAS');
+            }
             const existItems = localGet('@items');
             if (existItems) {
                 setItems(existItems);    
@@ -85,6 +88,7 @@ export default function PosTrx() {
             'trxTotal' : 0,
             'branchId' : user.branchId,
             'note' : '',
+            'kembalian' : 0,
         }
         //setNote("");
         console.log(trxInit);
@@ -331,19 +335,22 @@ export default function PosTrx() {
     const ViewItem = ({data} : { data : Item}) => {
 
         const selectItem = () => {
-            console.log('Select Item');
+            if (trx?.status != 'LUNAS') {
+                console.log('Select Item');
             
-            setMode('PRODUCT');
-            setItemSelect(data);
-            setQty(data.qty);
+                setMode('PRODUCT');
+                setItemSelect(data);
+                setQty(data.qty);
+            }
+            
         }
 
         return (
             <a href="#" onClick={selectItem}>
             <MenuItem>
-                <ListItemIcon>
+                { (trx?.status != 'LUNAS') && <ListItemIcon>
                     <FontAwesomeIcon icon={'pencil-alt'} />
-                </ListItemIcon>
+                </ListItemIcon> } 
                 <ListItemText>
                 { data.productName } <br />
                 X { data.qty }
@@ -496,6 +503,33 @@ export default function PosTrx() {
     const changeAmount = (inputAmount : any) => {
         setAmount(inputAmount);
     }
+
+    function ComLunas() {
+        return (
+            <>
+            <Card>
+                <CardContent>
+                    <Grid container>
+                        <Grid sm={12} md={12} textAlign={'center'}>
+                            <FontAwesomeIcon icon={'check-circle'} color="green" size="10x"/>
+                            <Typography variant="h4" textAlign={'center'} component="h4">
+                                    { trx?.status }
+                            </Typography>
+                            <fieldset className="border border-solid border-gray-300 p-3">
+                                <legend className="text-sm">
+                                    Kembalian
+                                </legend>
+                                <Typography variant="h4" textAlign={'center'} component="h4">
+                                    Rp{ (trx?.kembalian) ? formatCcy(trx?.kembalian) : 0 }
+                                </Typography>
+                            </fieldset>
+                        </Grid>
+                    </Grid>
+                </CardContent>
+            </Card>
+            </>
+        )
+    }
     
     return (
         <>
@@ -514,7 +548,7 @@ export default function PosTrx() {
                     
 
                         <MenuList>
-                            <MenuItem onClick={savePesan}>
+                            { (trx?.status != 'LUNAS') && <MenuItem onClick={savePesan}>
                             <ListItemIcon>
                                 <FontAwesomeIcon icon={'floppy-disk'}/>
                             </ListItemIcon>
@@ -522,7 +556,8 @@ export default function PosTrx() {
                             <Typography variant="body2" color="text.secondary">
                                 ⌘S
                             </Typography>
-                            </MenuItem>
+                            </MenuItem> }
+
                             <MenuItem>
                             <ListItemIcon>
                                 <FontAwesomeIcon icon={'print'}/>
@@ -532,8 +567,10 @@ export default function PosTrx() {
                                 ⌘P
                             </Typography>
                             </MenuItem>
+
                             <Divider />
-                            <MenuItem 
+                            
+                            { (trx?.status != 'LUNAS') && <MenuItem 
                             onClick={paymentShow}
                             style={{backgroundColor:'#90EE90'}}>
                             <ListItemIcon>
@@ -543,7 +580,7 @@ export default function PosTrx() {
                             <Typography variant="body2" color="text.secondary">
                                 Alt + P
                             </Typography>
-                            </MenuItem>
+                            </MenuItem> }
 
                             <MenuItem 
                             onClick={cancel}
@@ -552,7 +589,7 @@ export default function PosTrx() {
                                 
                                 <FontAwesomeIcon icon={'trash-alt'} color="#ffffff"/>
                             </ListItemIcon>
-                            <ListItemText>Batal</ListItemText>
+                            <ListItemText>Kembali</ListItemText>
                             <Typography variant="body2" color="#ffffff">
                                 Alt + C
                             </Typography>
@@ -594,6 +631,10 @@ export default function PosTrx() {
                     }
                     { (mode == 'PRODUCT') && <div>
                         <EditItem/>
+                    </div> }
+
+                    { (mode == 'LUNAS') && <div>
+                        <ComLunas/>
                     </div> }
 
                     { (mode == 'PAY') && <div>
