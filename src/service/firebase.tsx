@@ -65,7 +65,6 @@ export const submitTransaction = async() => {
       console.log(saveTrx);
 
       submitItems();
-      localRemove('@trx');;
     return true;
   } catch (error) {
       console.log(error);
@@ -88,7 +87,6 @@ export const submitItems = async() => {
           batch.set(item, d);
       });
       batch.commit();
-      localRemove('@items');
 
   } catch (error) {
       console.log(error);

@@ -9,13 +9,13 @@ import MenuItem from "@mui/material/MenuItem";
 import MenuList from "@mui/material/MenuList";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { DB, getSessionUser, refItems, refProduct, submitTransaction } from "@/service/firebase";
+import { DB, getSessionUser, refItems, refProduct, submitItems, submitTransaction } from "@/service/firebase";
 import { useEffect, useRef, useState } from "react";
 import { DocumentData, collection, doc, getDocs, setDoc, updateDoc, deleteDoc, where, query } from "firebase/firestore";
 import { Item, Product, Trx, User } from "@/service/model";
 import { Button, CardActions, CardContent, CardHeader, Input, List, ListItem, Paper } from "@mui/material";
 import Link from "next/link";
-import { AlertSweet, ToastSweet, formatCcy, localGet, localRemove, localSave, makeId } from "@/service/helper";
+import { AlertSweet, ToastSweet, formatCcy, formatNumber, localGet, localRemove, localSave, makeId } from "@/service/helper";
 import MOMENT from 'moment';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ComSkeleton from "@/component/skeleton";
@@ -31,7 +31,18 @@ export default function PosTrx() {
     const [itemSelect, setItemSelect] = useState<Item>();
     const txtSearch = useRef<any>(null);
     const [user, setUser] = useState<User | null>(null);
-    const [trx, setTrx] = useState<Trx>();
+    const [trx, setTrx] = useState<Trx>({
+        'trxId' : '',
+        'kasir' : '',
+        'kasirId' : '',
+        'createdDate' : MOMENT().format('YYYY-MM-DD HH:mm:ss'),
+        'status' : 'NEW',
+        'trxQty' : 0,
+        'trxTotal' : 0,
+        'branchId' : '',
+        'note' : '',
+        'kembalian' : 0,
+    });
     const [items, setItems] = useState<Item[]>([]);
     const [searchInput, setSearchInput] = useState('');
     const [mode, setMode] = useState('');
@@ -94,6 +105,7 @@ export default function PosTrx() {
         console.log(trxInit);
         setTrx(trxInit);
         localSave('@trx', trxInit);
+        localRemove('@items');
     }
 
     const getSession = () => {
@@ -175,12 +187,7 @@ export default function PosTrx() {
             } else {
                 items.splice(indexItem, 1, newItem);
             }
-            //setTrx(trx);
             calculateItem();
-            // if (searchText) {
-            //     updateSearch('');
-            //     refSearch.current?.focus();
-            // }
         } catch (error) {
             console.log(error);
             AlertSweet('error','Product', 'ERR.IPF.39 ' + error);
@@ -191,8 +198,6 @@ export default function PosTrx() {
         try {
             let trxUpdate = localGet('@trx');
             
-            // let dataVal = await FIRESTORE().collection(ref).where('trxId','==',itemUpdate.trxId).get();
-            // let data = dataVal.docs.map((val) => { return val.data() });
             let data = items;
             trxUpdate.createdDate = MOMENT().format("YYYY-MM-DD HH:mm:ss");
             trxUpdate.trxQty = sumBy(data, 'qty');
@@ -204,8 +209,6 @@ export default function PosTrx() {
             
         } catch (error) { 
             console.log(error);
-            
-            // Alert.alert('POS.211', error);
         }
         
     }
@@ -504,6 +507,34 @@ export default function PosTrx() {
         setAmount(inputAmount);
     }
 
+    const submitPayment = async() => {
+        let trxData = localGet('@trx');
+        trxData.status = 'LUNAS';
+        trxData.method = paymentType;
+        trxData.createdDate = MOMENT().format('YYYY-MM-DD hh:mm:ss');
+
+        trxData.amount = formatNumber(amount);
+        trxData.kembalian = formatNumber(amount) - trxData.trxTotal;
+
+        if (formatNumber(amount) < trx?.trxTotal) {
+            ToastSweet('warning','Pembayaran Kurang');
+        } else {
+            // transfer({
+            //   id:"CASH",
+            //   narrative:'Penjualan ID ' + trxData.trxId,
+            //   type:'CREDIT',
+            //   amount:trxData.trxTotal
+            // });
+            localSave('@trx', trxData);
+            
+            await submitTransaction();
+            await submitItems();
+            setTrx(trxData);
+            setMode('LUNAS');
+            ToastSweet('success','Pembayaran diterima');
+        }
+    }
+
     function ComLunas() {
         return (
             <>
@@ -569,7 +600,7 @@ export default function PosTrx() {
                             </MenuItem>
 
                             <Divider />
-                            
+
                             { (trx?.status != 'LUNAS') && <MenuItem 
                             onClick={paymentShow}
                             style={{backgroundColor:'#90EE90'}}>
@@ -725,8 +756,8 @@ export default function PosTrx() {
                             </Grid>
                         </CardContent>
                         <CardActions>
-                            <Button onClick={closePayment} variant="contained" fullWidth>
-                                <FontAwesomeIcon icon={'money-bill-1-wave'}/> Simpan Pembayaran
+                            <Button onClick={submitPayment} variant="contained" fullWidth>
+                                <FontAwesomeIcon icon={'money-bill-1-wave'}/> Terima Pembayaran
                             </Button>
                         </CardActions>
                     </Card>

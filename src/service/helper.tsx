@@ -15,6 +15,21 @@ export function formatCcy(amount:any) {
     return String(amount.toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'))
 }
 
+export function formatNumber(data : any) {
+    try {
+        if (data) {
+        
+            data = data.replace(/,/g,'');
+            
+        }
+        return parseInt(data);
+    } catch (error) {
+        return data;
+    }
+    
+    
+}
+
 export function AlertSweet(status:string | any, title:string, desc:string) {
     Swal.fire({
         title: title,
