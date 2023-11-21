@@ -2,7 +2,7 @@
 
 import { AlertSweet, ToastSweet, localSave } from "@/service/helper";
 import { Alert, Button, LinearProgress, TextField } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from 'react-hook-form'
 import Link from "next/link";
 import { redirect, useRouter } from "next/navigation";
@@ -23,6 +23,17 @@ export default function Login() {
     getUser(data);
   }
 
+  useEffect(() => {
+    console.log("initial Load");
+    
+    setLoading(false);
+  
+    return () => {
+      
+    }
+  }, [])
+  
+
   async function getUser(user : any) {
     setLoading(true);
     setLoadingDesc('Check User');
@@ -35,6 +46,10 @@ export default function Login() {
       setLoading(false);
       setLoadingDesc('User Tidak Terdaftar');
       AlertSweet('warning', 'Login Gagal','Username atau Password tidak sesuai');
+    } else if(row.userStatus != 'Active'){
+      setLoading(false);
+      setLoadingDesc('User Tidak Dapat digunakan');
+      AlertSweet('warning', 'Login Gagal','Username atau Password tidak dapat digunakan');
     } else {
       localSave('@user', row);
       setLoadingDesc('User Terdaftar');
@@ -53,12 +68,16 @@ export default function Login() {
       const data = await getDoc(ref);
       
       const row = data.data();
-      //console.log(row);
+      console.log(row);
       
       if (!row) {
         setLoading(false);
         setLoadingDesc('Usaha Tidak Terdaftar');
         AlertSweet('warning', 'Login Gagal','Silahkan login di aplikasi mobile untuk melengkapi data.');
+      } else if(!row.level){
+        setLoading(false);
+        setLoadingDesc('Upgrade Langganan untuk menggunakan beekasir web');
+        AlertSweet('warning', 'Tidak diijinkan','Silahkan upgrade langganan untuk menggunakan beekasir web.');
       } else {
         localSave('@company', row);
         setLoadingDesc('Usaha Terdaftar');
@@ -109,6 +128,7 @@ export default function Login() {
       
       setLoadingDesc('Anda akan diarahkan ke halaman admin.');
       router.push('/admin');
+      setLoading(false);
     }).catch((err) => {
       setLoading(false);
       if (err.code.includes('wrong-password')) {
