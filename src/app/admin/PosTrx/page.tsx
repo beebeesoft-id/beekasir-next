@@ -13,7 +13,7 @@ import { DB, getSessionUser, refItems, refProduct, submitItems, submitTransactio
 import { useEffect, useRef, useState } from "react";
 import { DocumentData, collection, doc, getDocs, setDoc, updateDoc, deleteDoc, where, query } from "firebase/firestore";
 import { Item, Product, Trx, User } from "@/service/model";
-import { Button, CardActions, CardContent, CardHeader, Input, List, ListItem, Paper } from "@mui/material";
+import { Button, CardActions, CardContent, CardHeader, CircularProgress, Input, LinearProgress, List, ListItem, Paper } from "@mui/material";
 import Link from "next/link";
 import { AlertSweet, ToastSweet, formatCcy, formatNumber, localGet, localRemove, localSave, makeId } from "@/service/helper";
 import MOMENT from 'moment';
@@ -106,6 +106,8 @@ export default function PosTrx() {
         setTrx(trxInit);
         localSave('@trx', trxInit);
         localRemove('@items');
+        setItems([]);
+        setMode('');
     }
 
     const getSession = () => {
@@ -477,6 +479,8 @@ export default function PosTrx() {
             AlertSweet('info','Info','Tidak ada Item untuk disimpan');
         } else {
             setMode('PAY');
+            setPaymentType('');
+            setAmount(0);
         }
     }
 
@@ -508,6 +512,10 @@ export default function PosTrx() {
     }
 
     const submitPayment = async() => {
+        setLoading(true);
+        if (loading) {
+            return;
+        }
         let trxData = localGet('@trx');
         trxData.status = 'LUNAS';
         trxData.method = paymentType;
@@ -518,6 +526,7 @@ export default function PosTrx() {
 
         if (formatNumber(amount) < trx?.trxTotal) {
             ToastSweet('warning','Pembayaran Kurang');
+            setLoading(false);
         } else {
             // transfer({
             //   id:"CASH",
@@ -531,6 +540,7 @@ export default function PosTrx() {
             await submitItems();
             setTrx(trxData);
             setMode('LUNAS');
+            setLoading(false);
             ToastSweet('success','Pembayaran diterima');
         }
     }
@@ -541,7 +551,7 @@ export default function PosTrx() {
             <Card>
                 <CardContent>
                     <Grid container>
-                        <Grid sm={12} md={12} textAlign={'center'}>
+                        <Grid sm={12} md={12} textAlign={'center'} item>
                             <FontAwesomeIcon icon={'check-circle'} color="green" size="10x"/>
                             <Typography variant="h4" textAlign={'center'} component="h4">
                                     { trx?.status }
@@ -583,21 +593,33 @@ export default function PosTrx() {
                             <ListItemIcon>
                                 <FontAwesomeIcon icon={'floppy-disk'}/>
                             </ListItemIcon>
-                            <ListItemText>Simpan</ListItemText>
-                            <Typography variant="body2" color="text.secondary">
+                            <ListItemText>Simpan dan Baru</ListItemText>
+                            {/* <Typography variant="body2" color="text.secondary">
                                 ⌘S
-                            </Typography>
+                            </Typography> */}
                             </MenuItem> }
 
+                            { (trx?.status == 'LUNAS') && <MenuItem onClick={initTrx}>
+                            <ListItemIcon>
+                                <FontAwesomeIcon icon={'plus-square'}/>
+                            </ListItemIcon>
+                            <ListItemText>Transaksi Baru</ListItemText>
+                            {/* <Typography variant="body2" color="text.secondary">
+                                ⌘S
+                            </Typography> */}
+                            </MenuItem> }
+
+                            <Link href={ '/nota?c=' + user?.companyId + '&b=' + user?.branchId + '&t=' + trx.trxId } target="_blank">
                             <MenuItem>
                             <ListItemIcon>
                                 <FontAwesomeIcon icon={'print'}/>
                             </ListItemIcon>
-                            <ListItemText>Cetak</ListItemText>
-                            <Typography variant="body2" color="text.secondary">
+                            <ListItemText>Faktur Penjualan</ListItemText>
+                            {/* <Typography variant="body2" color="text.secondary">
                                 ⌘P
-                            </Typography>
+                            </Typography> */}
                             </MenuItem>
+                            </Link>
 
                             <Divider />
 
@@ -608,9 +630,9 @@ export default function PosTrx() {
                                 <FontAwesomeIcon icon={'money-bill'}/>
                             </ListItemIcon>
                             <ListItemText>Pilih Pembayaran</ListItemText>
-                            <Typography variant="body2" color="text.secondary">
+                            {/* <Typography variant="body2" color="text.secondary">
                                 Alt + P
-                            </Typography>
+                            </Typography> */}
                             </MenuItem> }
 
                             <MenuItem 
@@ -621,9 +643,9 @@ export default function PosTrx() {
                                 <FontAwesomeIcon icon={'trash-alt'} color="#ffffff"/>
                             </ListItemIcon>
                             <ListItemText>Kembali</ListItemText>
-                            <Typography variant="body2" color="#ffffff">
+                            {/* <Typography variant="body2" color="#ffffff">
                                 Alt + C
-                            </Typography>
+                            </Typography> */}
                             </MenuItem>
                         </MenuList>
                     </Card>
@@ -756,9 +778,13 @@ export default function PosTrx() {
                             </Grid>
                         </CardContent>
                         <CardActions>
-                            <Button onClick={submitPayment} variant="contained" fullWidth>
+                            { (loading) && <Button disabled variant="contained" fullWidth>
+                                <FontAwesomeIcon icon={'spinner'} spin/> Memproses Pembayaran
+                            </Button> }
+                            { (!loading) && <Button onClick={submitPayment} variant="contained" fullWidth>
                                 <FontAwesomeIcon icon={'money-bill-1-wave'}/> Terima Pembayaran
-                            </Button>
+                            </Button> }
+                            
                         </CardActions>
                     </Card>
                     </div> }
