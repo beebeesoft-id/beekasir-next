@@ -94,14 +94,14 @@ export default function Nota({
 
         const res = await api.json();
         const data = await res.data;
-        console.log(data);
+        // console.log(data);
         if (data) {
             setItems(data);    
         }
         
     }
     return (
-        <div className="sm:pt-5 lg:pt-10">
+        <div className="sm:pt-5 lg:pt-10 p-5">
             <Grid container spacing={2}>
                 <Grid item sm={6} xs={12}>
                     { (company?.companyName) ? company?.companyName : 'loading company name...' } <br />
@@ -132,8 +132,8 @@ export default function Nota({
 
             </center>
             <br />
-            <table className="border-collapse border border-slate-500 w-full">
-            <thead>
+            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
                 <th>No</th>
                 <th>Produk/Layanan</th>
