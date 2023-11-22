@@ -56,14 +56,14 @@ export default function PosTrx() {
     return (
         <>
         <Grid container spacing={2}>
-            <Grid item sm={12} md={3} xl={3}>
+            {/* <Grid item sm={12} md={3} xl={3}>
                 <Card>
                     <CardContent>
                         Pencarian
                     </CardContent>
                 </Card>
-            </Grid>
-            <Grid item sm={12} md={9} xl={9}>
+            </Grid> */}
+            <Grid item sm={12} md={12} xl={12}>
                 <Card>
                     <CardContent>
                         <DataGrid
