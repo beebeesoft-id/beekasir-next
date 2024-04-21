@@ -15,11 +15,13 @@ export async function POST(req : Request, response : Response, head : Headers) {
       
       console.log(body);
       console.log(headersList);
-    //   const apiKey  = headersList.get('apikey');
+      const apiKey  = headersList.get('user-agent');
+      console.log(apiKey);
       
-    //   if ((!apiKey) || (apiKey != process.env.APIKEY)) {
-    //     return NextResponse.json({ 'data': null, 'status': '402', 'statusDesc' : 'Forbbiden'});
-    //   }
+      if (apiKey == 'Veritrans') {
+        console.log("Verified");
+        
+      }
       
       if (body.transaction_status == 'settlement') {
         const refBill = doc(DB, "Billing/" + body.order_id);
@@ -28,17 +30,25 @@ export async function POST(req : Request, response : Response, head : Headers) {
         console.log(bill);
         if (bill) {
           let exp = moment().add(1, 'M').format("YYYY-MM-DD");
-          console.log(exp);
           
           const refCompany = doc(DB, "Company/" + bill.companyId);
-          await updateDoc(refCompany, { 'level' : bill.level});
+          const company = (await getDoc(refCompany)).data();
+          console.log(company);
+          
+          if (company) {
+            if (company.exp) {
+              exp = moment(company.exp).add(1, 'M').format("YYYY-MM-DD");
+            }
+          }
+          console.log(exp);
+          await updateDoc(refCompany, { 'level' : bill.level, 'exp' : exp});
           console.log(body.order_id + " - " + body.transaction_status + " Level Updated");
           return NextResponse.json({ 'data': 'Payment Success ', 'status': '200', 'statusDesc' : 'Settlement Order '  + body.order_id});
         }
         
         console.log(body.order_id + " - " + body.transaction_status);
         
-        return NextResponse.json({ 'data': 'Payment Success ', 'status': '200', 'statusDesc' : 'Settlement Order '  + body.order_id});
+        return NextResponse.json({ 'data': 'Payment Status Receipt ', 'status': '200', 'statusDesc' : 'Order '  + body.order_id + ' Status ' + body.transaction_status});
       }
 
     
