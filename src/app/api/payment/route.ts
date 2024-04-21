@@ -7,7 +7,7 @@ import moment from "moment";
 
 export async function POST(req : Request, response : Response, head : Headers) {
     try {
-        console.log("request post");
+        console.log("request Trx");
         
       const body = await req.json();
       
@@ -27,14 +27,16 @@ export async function POST(req : Request, response : Response, head : Headers) {
         const bill = (await getDoc(refBill)).data();
         console.log(bill);
         if (bill) {
-          let exp = moment().add(1, 'M');
+          let exp = moment().add(1, 'M').format("YYYY-MM-DD");
           console.log(exp);
           
           const refCompany = doc(DB, "Company/" + bill.companyId);
-          await updateDoc(refCompany, { 'level' : bill.level, 'expired': exp});
+          await updateDoc(refCompany, { 'level' : bill.level});
+          console.log(body.order_id + " - " + body.transaction_status + " Level Updated");
           return NextResponse.json({ 'data': 'Payment Success ', 'status': '200', 'statusDesc' : 'Settlement Order '  + body.order_id});
         }
         
+        console.log(body.order_id + " - " + body.transaction_status);
         
         return NextResponse.json({ 'data': 'Payment Success ', 'status': '200', 'statusDesc' : 'Settlement Order '  + body.order_id});
       }
