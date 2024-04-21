@@ -1,5 +1,5 @@
 import { AUTH, DB } from "@/service/firebase";
-import { DocumentData, collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { DocumentData, collection, getDocs, doc, getDoc, updateDoc } from "firebase/firestore";
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { headers } from "next/dist/client/components/headers";
 import { NextResponse } from "next/server";
@@ -12,19 +12,25 @@ export async function POST(req : Request, response : Response, head : Headers) {
       
       const headersList = headers();
       
+      console.log(body);
+      console.log(headersList);
     //   const apiKey  = headersList.get('apikey');
       
     //   if ((!apiKey) || (apiKey != process.env.APIKEY)) {
     //     return NextResponse.json({ 'data': null, 'status': '402', 'statusDesc' : 'Forbbiden'});
     //   }
       
-    //   if (!body.username || !body.password) {
-    //     return NextResponse.json({ 'data': null, 'status': '400', 'statusDesc' : 'bad request'});
-    //   }
+      if (body.transaction_status == 'settlement') {
+        const ref = doc(DB, "Billing/" + body.order_id);
+        const bill = (await getDoc(ref)).data();
+        console.log(bill);
+        await updateDoc(ref, body);
+        return NextResponse.json({ 'data': 'Payment Success ', 'status': '200', 'statusDesc' : 'Settlement Order '  + body.order_id});
+      }
 
-    //   const ref = doc(DB, "Users/" + body.username);
+    
 
-    //   const user = (await getDoc(ref)).data();
+    
 
     //   if (!user) {
     //     return NextResponse.json({ 'data': null, 'status': '204', 'statusDesc' : 'no-content'});
@@ -42,8 +48,6 @@ export async function POST(req : Request, response : Response, head : Headers) {
 
     //     return NextResponse.json({ 'data': null, 'status': '204', 'statusDesc' : signIn.code});
     //   }
-        console.log(body);
-        console.log(headersList);
         
       return NextResponse.json({ 'data': body, 'status': '200', 'statusDesc' : headersList});
     } catch (error) {
