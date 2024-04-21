@@ -3,6 +3,7 @@ import { DocumentData, collection, getDocs, doc, getDoc, updateDoc } from "fireb
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { headers } from "next/dist/client/components/headers";
 import { NextResponse } from "next/server";
+import moment from "moment";
 
 export async function POST(req : Request, response : Response, head : Headers) {
     try {
@@ -21,10 +22,20 @@ export async function POST(req : Request, response : Response, head : Headers) {
     //   }
       
       if (body.transaction_status == 'settlement') {
-        const ref = doc(DB, "Billing/" + body.order_id);
-        const bill = (await getDoc(ref)).data();
+        const refBill = doc(DB, "Billing/" + body.order_id);
+        await updateDoc(refBill, body);
+        const bill = (await getDoc(refBill)).data();
         console.log(bill);
-        await updateDoc(ref, body);
+        if (bill) {
+          let exp = moment().add(1, 'M');
+          console.log(exp);
+          
+          const refCompany = doc(DB, "Company/" + bill.companyId);
+          await updateDoc(refCompany, { 'level' : bill.level, 'expired': exp});
+          return NextResponse.json({ 'data': 'Payment Success ', 'status': '200', 'statusDesc' : 'Settlement Order '  + body.order_id});
+        }
+        
+        
         return NextResponse.json({ 'data': 'Payment Success ', 'status': '200', 'statusDesc' : 'Settlement Order '  + body.order_id});
       }
 
