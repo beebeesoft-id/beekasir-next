@@ -4,6 +4,8 @@ import { headers } from "next/dist/client/components/headers";
 import { NextResponse } from "next/server";
 import moment from "moment";
 
+export const dynamic = "force-dynamic" //clodflare solution
+
 export async function GET(req : Request, response : Response, head : Headers) {
     try {
       console.log("Scanning Auto Downgrade");
