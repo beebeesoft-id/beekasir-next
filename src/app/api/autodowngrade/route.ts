@@ -11,10 +11,11 @@ export async function GET(req : Request, response : Response, head : Headers) {
       console.log("Scanning Auto Downgrade");
       
       const headersList = headers();
-      const apiKey  = headersList.get('api-key');
+      const apiKey  = headersList.get('apikey');
       
-      if (apiKey != 'FEDDFF345345') {
-        return NextResponse.json({ 'data': 'Access Forbbiden', 'status': '401', 'statusDesc' : 'Alert access unidentified'});
+      if ((!apiKey) || (apiKey != process.env.APIKEY)) {
+        console.log("ApiKey blocked " + apiKey);
+        return NextResponse.json({ 'data': 401, 'error': 'Not Authenticated.' }, { status : 401});
       }
       
       const list = collection(DB, "Company/");
