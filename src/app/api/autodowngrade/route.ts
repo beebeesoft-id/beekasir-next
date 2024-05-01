@@ -14,6 +14,8 @@ export async function GET(req : Request, response : Response, head : Headers) {
       const apiKey  = headersList.get('apikey');
       
       if ((!apiKey) || (apiKey != process.env.APIKEY)) {
+        console.log(headersList);
+        
         console.log("ApiKey blocked " + apiKey);
         return NextResponse.json({ 'data': 401, 'error': 'Not Authenticated.' }, { status : 401});
       }
