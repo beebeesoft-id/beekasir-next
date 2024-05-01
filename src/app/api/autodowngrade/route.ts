@@ -46,7 +46,7 @@ export async function GET(req : Request, response : Response, head : Headers) {
       console.log(error);
       
       
-      return NextResponse.json({ 'data': "Internal Server Error", 'status': '500', 'statusDesc' : 'Please contact administrator'});
+      return NextResponse.json({ 'data': "Internal Server Error", 'status': '500', 'statusDesc' : 'AutoDownGrade'});
     }
   
   
