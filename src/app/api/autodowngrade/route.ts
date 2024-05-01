@@ -39,7 +39,12 @@ export async function GET(req : Request, response : Response, head : Headers) {
       
       return NextResponse.json({ 'data': data.length, 'status': '200', 'statusDesc' : 'Member Berhasil di scaning'});
     } catch (error) {
+        console.log("Error di autodowngrade");
+        
+        console.log('error ' + error);
+        
       console.log(error);
+      
       
       return NextResponse.json({ 'data': "Internal Server Error", 'status': '500', 'statusDesc' : 'Please contact administrator'});
     }
