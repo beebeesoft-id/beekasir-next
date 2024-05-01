@@ -11,9 +11,9 @@ export async function GET(req : Request, response : Response, head : Headers) {
       console.log("Scanning Auto Downgrade");
       
       const headersList = headers();
-      const apiKey  = headersList.get('apikey');
+      const apiKey  = headersList.get('Authorization');
       
-      if ((!apiKey) || (apiKey != process.env.APIKEY)) {
+      if ((!apiKey) || (apiKey != `Bearer ${process.env.APIKEY}`)) {
         console.log(headersList);
         
         console.log("ApiKey blocked " + apiKey);
