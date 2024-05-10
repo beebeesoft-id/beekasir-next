@@ -37,7 +37,11 @@ export async function GET(req : Request, response : Response, head : Headers) {
             expired = true;
             countExp = countExp+1;
             const refCompany = doc(DB, "Company/" + row.id);
-            await updateDoc(refCompany, { 'level' : 0 });
+            await updateDoc(refCompany, { 'level' : 0, 'exp' : null });
+            let subject = "Downgrade Akun Beekasir: Expired " + row.exp;
+            let body = `Hi ${row.companyName} <br/><br/>Mohon maaf kami belum menerima pembayaran perpanjangan sampai waktu expired nih di ${row.exp}, Untuk sementara akun akan di downgrade ke member FREE, silahkan lakukan perpanjangan pada aplikasi beekasir pojok kanan atas di halaman home ya. <br/>Email ini dikirim otomatis no reply ya kak<br/>Kirim email ke beebeesoft.id@gmail.com jika ada kendala. <br/><br/>Salam<br/>Beekasir System`;
+            sendEmail(row, subject, body);
+            console.log('Kirim Info Downgrade ke ' + row.createdBy);
             console.log(row.id + ' - ' + row.companyName + ' - Expired');
         }
         
@@ -60,20 +64,30 @@ export async function GET(req : Request, response : Response, head : Headers) {
 }
 
 async function remider(data : any) {
-  let selisih = 0;
-  const dayReminder = 5;
-  if (data.exp) {
-    selisih = moment().diff(data.exp, 'day');
+  try {
+    let selisih = 0;
+    const dayReminder = -4;
+    if (data.exp) {
+      selisih = moment().diff(data.exp, 'day');
+      console.log(data.companyName + ' ' + selisih);
+    }
+    if (selisih == dayReminder) {
+      console.log('Kirim reminder ke ' + data.createdBy);
+      let subject = "Reminder Beekasir: Perpanjangan " + data.exp;
+      let body = `Hi ${data.companyName} <br/><br/>Saatnya perpanjangan, akun Beekasir anda akan expired nih di ${data.exp}, lakukan perpanjangan pada aplikasi beekasir pojok kanan atas di halaman home ya. <br/>Email ini dikirim otomatis no reply ya kak<br/>Kirim email ke beebeesoft.id@gmail.com jika ada kendala. <br/><br/>Salam<br/>Beekasir System`;
+      sendEmail(data, subject, body);
+      
+    }
+  } catch (error) {
+    console.log(error);
+    
   }
-  if (selisih == dayReminder) {
-    sendEmail(data);
-    console.log('Kirim reminder ke ' + data.createdBy);
-  }
+  
   
   
 }
 
-const sendEmail = async(data : any) => {
+const sendEmail = async(data : any, subject: string, body: string) => {
   try {
       const response = await fetch('https://api.mailersend.com/v1/email',
       {
@@ -100,9 +114,9 @@ const sendEmail = async(data : any) => {
                     "name": 'BeeBeeSoft'
                 }
               ],
-                  "subject": "Reminder Beekasir: Perpanjangan " + data.exp,
-                  "text":"Hi Saatnya perpanjangan, akun beekasir anda akan expired nih, lakukan perpanjangan pada aplikasi beekasir pojok kanan atas di halaman home ya.",
-                  "html": `Hi ${data.companyName} <br/><br/>Saatnya perpanjangan, akun Beekasir anda akan expired nih di ${data.exp}, lakukan perpanjangan pada aplikasi beekasir pojok kanan atas di halaman home ya. <br/>Email ini dikirim otomatis no reply ya kak<br/>Kirim email ke beebeesoft.id@gmail.com jika ada kendala. <br/><br/>Salam<br/>Beekasir System`
+                  "subject": subject,
+                  "text": body,
+                  "html": body
           }),
       });
       console.log(response);
