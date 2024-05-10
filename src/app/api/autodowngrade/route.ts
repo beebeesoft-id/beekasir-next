@@ -13,12 +13,12 @@ export async function GET(req : Request, response : Response, head : Headers) {
       const headersList = headers();
       const apiKey  = headersList.get('Authorization');
       
-      if ((!apiKey) || (apiKey != `Bearer ${process.env.APIKEY}`)) {
-        console.log(headersList);
+      // if ((!apiKey) || (apiKey != `Bearer ${process.env.APIKEY}`)) {
+      //   console.log(headersList);
         
-        console.log("ApiKey blocked " + apiKey);
-        return NextResponse.json({ 'data': 401, 'error': 'Not Authenticated.' }, { status : 401});
-      }
+      //   console.log("ApiKey blocked " + apiKey);
+      //   return NextResponse.json({ 'data': 401, 'error': 'Not Authenticated.' }, { status : 401});
+      // }
       
       const list = collection(DB, "Company/");
 
