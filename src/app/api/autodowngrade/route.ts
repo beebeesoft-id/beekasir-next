@@ -3,6 +3,7 @@ import { collection, getDocs, doc, updateDoc, query, where } from "firebase/fire
 import { headers } from "next/dist/client/components/headers";
 import { NextResponse } from "next/server";
 import moment from "moment";
+import axios from "axios";
 
 export const dynamic = "force-dynamic" //clodflare solution
 
@@ -45,7 +46,8 @@ export async function GET(req : Request, response : Response, head : Headers) {
                 countExp = countExp+1;
                 console.log('Kirim Info Downgrade ke ' + row.createdBy);
                 const refCompany = doc(DB, "Company/" + row.id);
-                await updateDoc(refCompany, { 'level' : 0, 'exp' : null });
+                let update = await updateDoc(refCompany, { 'level' : 0, 'exp' : null });
+                console.log(update);
                 let subject = "Downgrade Akun Beekasir: Expired " + row.exp;
                 let body = `Hi ${row.companyName} <br/><br/>Mohon maaf kami belum menerima pembayaran perpanjangan sampai waktu expired nih di ${row.exp}, Untuk sementara akun akan di downgrade ke member FREE, silahkan lakukan perpanjangan pada aplikasi beekasir pojok kanan atas di halaman home ya. <br/>Email ini dikirim otomatis no reply ya kak<br/>Kirim email ke beebeesoft.id@gmail.com jika ada kendala. <br/><br/>Salam<br/>Beekasir System`;
                 sendEmail(row, subject, body);
@@ -85,15 +87,7 @@ export async function GET(req : Request, response : Response, head : Headers) {
 const sendEmail = async(data : any, subject: string, body: string) => {
   try {
     
-      const response = await fetch('https://api.mailersend.com/v1/email',
-      {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer mlsn.920845eec581dad1c94108f4890cd3ff1b424e9a9b9e00f363b179cbe85a9d59',
-            'X-Requested-With' : 'XMLHttpRequest'
-          },
-          body: JSON.stringify({
+    const response = await axios.post('https://api.mailersend.com/v1/email', JSON.stringify({
               "from": {
                   "email": 'admin@beebeesoft.com',
                   "name": 'Beekasir System'
@@ -113,8 +107,12 @@ const sendEmail = async(data : any, subject: string, body: string) => {
                   "subject": subject,
                   "text": body,
                   "html": body
-          }),
-      });
+          }), { 
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer mlsn.920845eec581dad1c94108f4890cd3ff1b424e9a9b9e00f363b179cbe85a9d59',
+          'X-Requested-With' : 'XMLHttpRequest'
+        }});
       console.log(response);
       
   } catch (error) {
