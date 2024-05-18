@@ -7,7 +7,7 @@ import axios from "axios";
 
 //export const dynamic = "force-dynamic" //clodflare solution
 
-export async function GET(req : Request, response : Response, head : Headers) {
+export async function POST(req : Request, response : Response, head : Headers) {
     try {
       console.log("Scanning Auto Downgrade");
       
