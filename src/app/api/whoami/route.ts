@@ -7,13 +7,13 @@ import { NextResponse } from "next/server";
 export async function GET(req : Request, response : Response, head : Headers) {
     try {
       
-      const headersList = headers();
+      // const headersList = headers();
       
-      const apiKey  = headersList.get('apikey');
+      // const apiKey  = headersList.get('apikey');
       
-      if ((!apiKey) || (apiKey != process.env.APIKEY)) {
-        return NextResponse.json({ 'data': null, 'status': '402', 'statusDesc' : 'Forbbiden'});
-      }
+      // if ((!apiKey) || (apiKey != process.env.APIKEY)) {
+      //   return NextResponse.json({ 'data': null, 'status': '402', 'statusDesc' : 'Forbbiden'});
+      // }
       
       console.log("start");
       console.log(AUTH.currentUser?.email);
