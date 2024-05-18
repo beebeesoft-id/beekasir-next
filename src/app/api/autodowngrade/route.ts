@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import moment from "moment";
 import axios from "axios";
 
-export const dynamic = "force-dynamic" //clodflare solution
+//export const dynamic = "force-dynamic" //clodflare solution
 
 export async function GET(req : Request, response : Response, head : Headers) {
     try {
