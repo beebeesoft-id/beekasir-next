@@ -86,6 +86,7 @@ export async function POST(req : Request, response : Response, head : Headers) {
 
 const sendEmail = async(data : any, subject: string, body: string) => {
   try {
+    console.log('Sending mail');
     
     const response = await axios.post('https://api.mailersend.com/v1/email', JSON.stringify({
               "from": {
@@ -113,10 +114,12 @@ const sendEmail = async(data : any, subject: string, body: string) => {
           'Authorization': 'Bearer mlsn.920845eec581dad1c94108f4890cd3ff1b424e9a9b9e00f363b179cbe85a9d59',
           'X-Requested-With' : 'XMLHttpRequest'
         }});
+        console.log('sending done');
+        
       console.log(response);
       
   } catch (error) {
-      
+    console.log('sending error');
       console.log(error)
   }
 }
