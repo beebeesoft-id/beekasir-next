@@ -42,11 +42,16 @@ export async function POST(req : Request, response : Response, head : Headers) {
             selisih = moment().diff(row.exp, 'day');
             console.log(row.companyName + ' ' + selisih);
 
-            if (selisih > 0) {
+            if (selisih == dayReminder) {
+              console.log('Kirim reminder ke ' + row.createdBy);
+              let subject = "Reminder Beekasir: Perpanjangan " + row.exp;
+              let body = `Hi ${row.companyName} <br/><br/>Saatnya perpanjangan, akun Beekasir anda akan expired nih di ${row.exp}, lakukan perpanjangan pada aplikasi beekasir pojok kanan atas di halaman home ya. <br/>Email ini dikirim otomatis no reply ya kak<br/>Kirim email ke beebeesoft.id@gmail.com jika ada kendala. <br/><br/>Salam<br/>Beekasir System`;
+              await sendEmail(row, subject, body);
+              
+            } else if (selisih > 0) {
                 countExp = countExp+1;
                 console.log('Kirim Info Downgrade ke ' + row.createdBy);
-                
-                
+
                 const refCompany = doc(DB, "Company/" + row.id);
                 console.log(refCompany);
                 console.log('ref');
@@ -57,16 +62,10 @@ export async function POST(req : Request, response : Response, head : Headers) {
                 console.log(update);
                 let subject = "Downgrade Akun Beekasir: Expired " + row.exp;
                 let body = `Hi ${row.companyName} <br/><br/>Mohon maaf kami belum menerima pembayaran perpanjangan sampai waktu expired nih di ${row.exp}, Untuk sementara akun akan di downgrade ke member FREE, silahkan lakukan perpanjangan pada aplikasi beekasir pojok kanan atas di halaman home ya. <br/>Email ini dikirim otomatis no reply ya kak<br/>Kirim email ke beebeesoft.id@gmail.com jika ada kendala. <br/><br/>Salam<br/>Beekasir System`;
-                sendEmail(row, subject, body);
+                await sendEmail(row, subject, body);
                 console.log('berhasil kirim email');
                 
-            } else if (selisih == dayReminder) {
-              console.log('Kirim reminder ke ' + row.createdBy);
-              let subject = "Reminder Beekasir: Perpanjangan " + row.exp;
-              let body = `Hi ${row.companyName} <br/><br/>Saatnya perpanjangan, akun Beekasir anda akan expired nih di ${row.exp}, lakukan perpanjangan pada aplikasi beekasir pojok kanan atas di halaman home ya. <br/>Email ini dikirim otomatis no reply ya kak<br/>Kirim email ke beebeesoft.id@gmail.com jika ada kendala. <br/><br/>Salam<br/>Beekasir System`;
-              sendEmail(row, subject, body);
-              
-            }
+            } 
           }
 
           
