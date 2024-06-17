@@ -45,20 +45,20 @@ export async function POST(req : Request, response : Response, head : Headers) {
             if (selisih > 0) {
                 countExp = countExp+1;
                 console.log('Kirim Info Downgrade ke ' + row.createdBy);
-                let subject = "Downgrade Akun Beekasir: Expired " + row.exp;
-                let body = `Hi ${row.companyName} <br/><br/>Mohon maaf kami belum menerima pembayaran perpanjangan sampai waktu expired nih di ${row.exp}, Untuk sementara akun akan di downgrade ke member FREE, silahkan lakukan perpanjangan pada aplikasi beekasir pojok kanan atas di halaman home ya. <br/>Email ini dikirim otomatis no reply ya kak<br/>Kirim email ke beebeesoft.id@gmail.com jika ada kendala. <br/><br/>Salam<br/>Beekasir System`;
-                sendEmail(row, subject, body);
-                console.log('berhasil kirim email');
+                
                 
                 const refCompany = doc(DB, "Company/" + row.id);
                 console.log(refCompany);
                 console.log('ref');
                 
-                let update = await updateDoc(refCompany, { 'level' : 0, 'exp' : null });
+                let update = updateDoc(refCompany, { 'level' : 0, 'exp' : null });
                 console.log('update');
                 
                 console.log(update);
-
+                let subject = "Downgrade Akun Beekasir: Expired " + row.exp;
+                let body = `Hi ${row.companyName} <br/><br/>Mohon maaf kami belum menerima pembayaran perpanjangan sampai waktu expired nih di ${row.exp}, Untuk sementara akun akan di downgrade ke member FREE, silahkan lakukan perpanjangan pada aplikasi beekasir pojok kanan atas di halaman home ya. <br/>Email ini dikirim otomatis no reply ya kak<br/>Kirim email ke beebeesoft.id@gmail.com jika ada kendala. <br/><br/>Salam<br/>Beekasir System`;
+                sendEmail(row, subject, body);
+                console.log('berhasil kirim email');
                 
             } else if (selisih == dayReminder) {
               console.log('Kirim reminder ke ' + row.createdBy);
