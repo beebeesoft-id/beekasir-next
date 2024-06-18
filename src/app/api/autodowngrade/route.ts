@@ -21,7 +21,6 @@ export async function POST(req : Request, response : Response, head : Headers) {
       console.log('Found ' + data.length);
       let countExp = 0;
       const dayReminder = -4;
-      const lastDayReminder = 0;
       
       for (const val of data)  {
         try {
@@ -39,7 +38,7 @@ export async function POST(req : Request, response : Response, head : Headers) {
               let body = `Hi ${row.companyName} <br/><br/>Saatnya perpanjangan, akun Beekasir anda akan expired nih di ${row.exp}, lakukan perpanjangan pada aplikasi beekasir pojok kanan atas di halaman home ya. <br/>Email ini dikirim otomatis no reply ya kak<br/>Kirim email ke beebeesoft.id@gmail.com jika ada kendala. <br/><br/>Salam<br/>Beekasir System`;
               await sendEmail(row, subject, body);
               
-            } else if (dayDiff == lastDayReminder) {
+            } else if (row.exp == today) {
               console.log('Send reminder to ' + row.createdBy);
               let subject = "Reminder Beekasir: Perpanjangan " + row.exp;
               let body = `Hi ${row.companyName} <br/><br/>Hari ini terakhir, akun Beekasir anda akan expired besok nih di ${row.exp}, lakukan perpanjangan pada aplikasi beekasir pojok kanan atas di halaman home ya. <br/>Email ini dikirim otomatis no reply ya kak<br/>Kirim email ke beebeesoft.id@gmail.com jika ada kendala. <br/><br/>Salam<br/>Beekasir System`;
