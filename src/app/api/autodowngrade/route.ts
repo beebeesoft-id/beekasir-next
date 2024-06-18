@@ -11,16 +11,6 @@ export async function POST(req : Request, response : Response, head : Headers) {
     try {
       console.log("Scanning Auto Downgrade");
       
-      //const headersList = headers();
-      //const apiKey  = headersList.get('Authorization');
-      
-      // if ((!apiKey) || (apiKey != `Bearer ${process.env.APIKEY}`)) {
-      //   console.log(headersList);
-        
-      //   console.log("ApiKey blocked " + apiKey);
-      //   return NextResponse.json({ 'data': 401, 'error': 'Not Authenticated.' }, { status : 401});
-      // }
-      
       const list = collection(DB, "Company/");
 
       const filter = query(list, where('level','!=',0));
@@ -32,31 +22,31 @@ export async function POST(req : Request, response : Response, head : Headers) {
       let countExp = 0;
       const dayReminder = -4;
       
-      data.forEach(async(val) => {
+      for (const val of data)  {
         try {
           let row = val.data();
 
-          let selisih = 0;
+          let dayDiff = 0;
           
           if (row.exp) {
-            selisih = moment().diff(row.exp, 'day');
-            console.log(row.companyName + ' ' + selisih);
+            dayDiff = moment().diff(row.exp, 'day');
+            console.log(row.companyName + ' ' + dayDiff);
 
-            if (selisih == dayReminder) {
-              console.log('Kirim reminder ke ' + row.createdBy);
+            if (dayDiff == dayReminder) {
+              console.log('Send reminder to ' + row.createdBy);
               let subject = "Reminder Beekasir: Perpanjangan " + row.exp;
               let body = `Hi ${row.companyName} <br/><br/>Saatnya perpanjangan, akun Beekasir anda akan expired nih di ${row.exp}, lakukan perpanjangan pada aplikasi beekasir pojok kanan atas di halaman home ya. <br/>Email ini dikirim otomatis no reply ya kak<br/>Kirim email ke beebeesoft.id@gmail.com jika ada kendala. <br/><br/>Salam<br/>Beekasir System`;
               await sendEmail(row, subject, body);
               
-            } else if (selisih > 0) {
+            } else if (dayDiff > 0) {
                 countExp = countExp+1;
-                console.log('Kirim Info Downgrade ke ' + row.createdBy);
+                console.log('Send Info Downgrade to ' + row.createdBy);
 
                 const refCompany = doc(DB, "Company/" + row.id);
                 console.log(refCompany);
                 console.log('ref');
                 
-                let update = updateDoc(refCompany, { 'level' : 0, 'exp' : null });
+                let update = await updateDoc(refCompany, { 'level' : 0, 'exp' : null });
                 console.log('update');
                 
                 console.log(update);
@@ -74,10 +64,10 @@ export async function POST(req : Request, response : Response, head : Headers) {
           
         }
         
-      });
+      }
       console.log("Finish Scanning");
       
-      return NextResponse.json({ 'data': countExp + ' of ' + data.length, 'status': '200', 'statusDesc' : 'Member Berhasil di scanning'});
+      return NextResponse.json({ 'data': countExp + ' of ' + data.length, 'status': '200', 'statusDesc' : 'Success'});
     } catch (error) {
         console.log("Error di autodowngrade");
         
