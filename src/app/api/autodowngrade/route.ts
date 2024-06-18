@@ -21,6 +21,7 @@ export async function POST(req : Request, response : Response, head : Headers) {
       console.log('Found ' + data.length);
       let countExp = 0;
       const dayReminder = -4;
+      const lastDayReminder = -1;
       
       for (const val of data)  {
         try {
@@ -38,18 +39,21 @@ export async function POST(req : Request, response : Response, head : Headers) {
               let body = `Hi ${row.companyName} <br/><br/>Saatnya perpanjangan, akun Beekasir anda akan expired nih di ${row.exp}, lakukan perpanjangan pada aplikasi beekasir pojok kanan atas di halaman home ya. <br/>Email ini dikirim otomatis no reply ya kak<br/>Kirim email ke beebeesoft.id@gmail.com jika ada kendala. <br/><br/>Salam<br/>Beekasir System`;
               await sendEmail(row, subject, body);
               
+            } else if (dayDiff == lastDayReminder) {
+              console.log('Send reminder to ' + row.createdBy);
+              let subject = "Reminder Beekasir: Perpanjangan " + row.exp;
+              let body = `Hi ${row.companyName} <br/><br/>Hari ini terakhir, akun Beekasir anda akan expired besok nih di ${row.exp}, lakukan perpanjangan pada aplikasi beekasir pojok kanan atas di halaman home ya. <br/>Email ini dikirim otomatis no reply ya kak<br/>Kirim email ke beebeesoft.id@gmail.com jika ada kendala. <br/><br/>Salam<br/>Beekasir System`;
+              await sendEmail(row, subject, body);
+              
             } else if (dayDiff > 0) {
                 countExp = countExp+1;
                 console.log('Send Info Downgrade to ' + row.createdBy);
 
                 const refCompany = doc(DB, "Company/" + row.id);
-                console.log(refCompany);
-                console.log('ref');
                 
                 let update = await updateDoc(refCompany, { 'level' : 0, 'exp' : null });
-                console.log('update');
+                console.log('Downgrade Sukses ' + row.companyName);
                 
-                console.log(update);
                 let subject = "Downgrade Akun Beekasir: Expired " + row.exp;
                 let body = `Hi ${row.companyName} <br/><br/>Mohon maaf kami belum menerima pembayaran perpanjangan sampai waktu expired nih di ${row.exp}, Untuk sementara akun akan di downgrade ke member FREE, silahkan lakukan perpanjangan pada aplikasi beekasir pojok kanan atas di halaman home ya. <br/>Email ini dikirim otomatis no reply ya kak<br/>Kirim email ke beebeesoft.id@gmail.com jika ada kendala. <br/><br/>Salam<br/>Beekasir System`;
                 await sendEmail(row, subject, body);
@@ -61,7 +65,6 @@ export async function POST(req : Request, response : Response, head : Headers) {
           
         } catch (error) {
           console.log(error);
-          
         }
         
       }
@@ -69,12 +72,9 @@ export async function POST(req : Request, response : Response, head : Headers) {
       
       return NextResponse.json({ 'data': countExp + ' of ' + data.length, 'status': '200', 'statusDesc' : 'Success'});
     } catch (error) {
-        console.log("Error di autodowngrade");
-        
-        console.log('error ' + error);
+      console.log("Error autodowngrade");
         
       console.log(error);
-      
       
       return NextResponse.json({ 'data': "AutoDownGrade", 'status': '500', 'statusDesc' : error});
     }
@@ -112,12 +112,12 @@ const sendEmail = async(data : any, subject: string, body: string) => {
           'Authorization': 'Bearer mlsn.920845eec581dad1c94108f4890cd3ff1b424e9a9b9e00f363b179cbe85a9d59',
           'X-Requested-With' : 'XMLHttpRequest'
         }});
-        console.log('sending done');
+        console.log('sending email done');
         
-      console.log(response);
+        console.log(response);
       
   } catch (error) {
-    console.log('sending error');
-      console.log(error)
+    console.log('sending email error');
+    console.log(error)
   }
 }
