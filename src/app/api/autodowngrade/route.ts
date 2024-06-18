@@ -21,7 +21,7 @@ export async function POST(req : Request, response : Response, head : Headers) {
       console.log('Found ' + data.length);
       let countExp = 0;
       const dayReminder = -4;
-      const lastDayReminder = -1;
+      const lastDayReminder = 0;
       
       for (const val of data)  {
         try {
