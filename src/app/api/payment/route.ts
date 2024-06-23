@@ -31,11 +31,17 @@ export async function POST(req : Request, response : Response, head : Headers) {
           const company = (await getDoc(refCompany)).data();
           //console.log(company);
           
-          if (company) {
-            if (company.exp) {
+          
+          if (company?.exp) {
+            let diff = moment().diff(company.exp, 'day');
+            console.log(diff);
+            
+            if (diff < 0) {
               exp = moment(company.exp).add(bill.qty, 'M').format("YYYY-MM-DD");
             }
+              
           }
+          
           //console.log(exp);
           await updateDoc(refCompany, { 'level' : bill.level, 'exp' : exp});
           console.log(body.order_id + " - " + body.transaction_status + " Level Updated " + bill.level + " Until " + exp);
