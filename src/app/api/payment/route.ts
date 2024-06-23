@@ -20,12 +20,12 @@ export async function POST(req : Request, response : Response, head : Headers) {
       const refBill = doc(DB, "Billing/" + body.order_id);
       await updateDoc(refBill, body);
       const bill = (await getDoc(refBill)).data();
-      //console.log(bill);
+      console.log(bill);
 
       if (body.transaction_status == 'settlement') {
         
         if (bill) {
-          let exp = moment().add(1, 'M').format("YYYY-MM-DD");
+          let exp = moment().add(bill.qty, 'M').format("YYYY-MM-DD");
           
           const refCompany = doc(DB, "Company/" + bill.companyId);
           const company = (await getDoc(refCompany)).data();
@@ -33,12 +33,12 @@ export async function POST(req : Request, response : Response, head : Headers) {
           
           if (company) {
             if (company.exp) {
-              exp = moment(company.exp).add(1, 'M').format("YYYY-MM-DD");
+              exp = moment(company.exp).add(bill.qty, 'M').format("YYYY-MM-DD");
             }
           }
           //console.log(exp);
           await updateDoc(refCompany, { 'level' : bill.level, 'exp' : exp});
-          console.log(body.order_id + " - " + body.transaction_status + " Level Updated" + bill.level + " Until " + exp);
+          console.log(body.order_id + " - " + body.transaction_status + " Level Updated " + bill.level + " Until " + exp);
           return NextResponse.json({ 'data': 'Settlement and Upgrade Success ', 'status': '200', 'statusDesc' : 'Settlement Order '  + body.order_id});
         }
         
