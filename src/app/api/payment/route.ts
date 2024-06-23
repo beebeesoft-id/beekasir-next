@@ -9,6 +9,7 @@ export async function POST(req : Request, response : Response, head : Headers) {
       console.log("Payment Receipt");
         
       const body = await req.json();
+      console.log(body);
       
       const headersList = headers();
       const apiKey  = headersList.get('user-agent');
