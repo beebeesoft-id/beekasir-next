@@ -1,6 +1,6 @@
 "use client";
 
-import { AppBar, Avatar, Box, Button, Card, CardActions, CardContent, CardHeader, Container, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Toolbar, Typography } from "@mui/material"
+import { AppBar, Avatar, Box, Breadcrumbs, Button, Card, CardActions, CardContent, CardHeader, Container, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Toolbar, Typography } from "@mui/material"
 import MenuIcon from '@mui/icons-material/Menu'
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
@@ -14,7 +14,7 @@ import {
 
 import React, { useEffect, useState } from "react";
 import { deepPurple } from "@mui/material/colors";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ConfirmSweet, ToastSweet, localGet } from "@/service/helper";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { AUTH } from "@/service/firebase";
@@ -22,6 +22,9 @@ import { fa9, fas } from "@fortawesome/free-solid-svg-icons";
 import { fab } from "@fortawesome/free-brands-svg-icons";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import Pkg from '../../../package.json';
+import { GridExpandMoreIcon } from "@mui/x-data-grid";
+import Link from "next/link";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 library.add(fas, fab, fa9);
 export default function AdminLayout({
@@ -36,6 +39,7 @@ export default function AdminLayout({
     const [user, setUser] = useState<any>({});
     const [company, setCompany] = useState<any>({});
     const [branch, setBranch] = useState<any>({});
+    const pathname = usePathname();
 
     useEffect(() => {
       autoload();
@@ -262,6 +266,21 @@ export default function AdminLayout({
         </React.Fragment>
         ))}
         <div style={{padding:15}}>
+        <Breadcrumbs aria-label="breadcrumb">
+          <Link
+            color="inherit"
+            href="/admin"
+          >
+            <FontAwesomeIcon icon={'home'}/> Home
+          </Link>
+          <Link
+            color="inherit"
+            href="#"
+          >
+            <FontAwesomeIcon icon={'bars'}/> { pathname }
+          </Link>
+          
+        </Breadcrumbs>
         {children}
         </div>
         </>
