@@ -57,22 +57,27 @@ export default function AdminLayout({
     }, []);
     
     const autoload = async() => {
+      try {
+        const localUser = await localGet('@user');
+        //console.log(localUser);
+        setUser(localUser);
+
+        const localCompany = await localGet('@company');
+        //console.log(localCompany);
+        setCompany(localCompany);
+
+        const localBranch = await localGet('@branch');
+        //console.log(localBranch);
+        setBranch(localBranch);
+
+        const getMenus = setAccess(localUser);
+        console.log(getMenus);
+        setMenus(getMenus);
+      } catch (error) {
+        console.log(error);
+        
+      }
       
-      const localUser = await localGet('@user');
-      //console.log(localUser);
-      setUser(localUser);
-
-      const localCompany = await localGet('@company');
-      //console.log(localCompany);
-      setCompany(localCompany);
-
-      const localBranch = await localGet('@branch');
-      //console.log(localBranch);
-      setBranch(localBranch);
-
-      const getMenus = setAccess(localUser);
-      console.log(getMenus);
-      setMenus(getMenus);
 
       onAuthStateChanged(AUTH, (user) => {
         
