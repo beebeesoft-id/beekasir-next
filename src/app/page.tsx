@@ -36,6 +36,7 @@ export default function Home() {
               src="/bg-beekasir.png"
               alt="Beekasir Logo"
               sizes='80vw'
+              style={{zIndex:-1, objectFit:'cover'}}
               priority
             />
       </div>
