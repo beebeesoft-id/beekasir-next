@@ -15,7 +15,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { deepPurple } from "@mui/material/colors";
 import { usePathname, useRouter } from "next/navigation";
-import { ConfirmSweet, ToastSweet, localGet } from "@/service/helper";
+import { ConfirmSweet, ToastSweet, localGet, setAccess } from "@/service/helper";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { AUTH } from "@/service/firebase";
 import { fa9, fas } from "@fortawesome/free-solid-svg-icons";
@@ -25,7 +25,13 @@ import Pkg from '../../../package.json';
 import { GridExpandMoreIcon } from "@mui/x-data-grid";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
+interface DataMenu {
+  id:string;
+  label:string;
+  icon:any;
+  route:string;
+  level:number;
+}
 library.add(fas, fab, fa9);
 export default function AdminLayout({
     children,
@@ -39,6 +45,7 @@ export default function AdminLayout({
     const [user, setUser] = useState<any>({});
     const [company, setCompany] = useState<any>({});
     const [branch, setBranch] = useState<any>({});
+    const [menus, setMenus] = useState<DataMenu[]>([]);
     const pathname = usePathname();
 
     useEffect(() => {
@@ -62,6 +69,10 @@ export default function AdminLayout({
       const localBranch = await localGet('@branch');
       //console.log(localBranch);
       setBranch(localBranch);
+
+      const getMenus = setAccess(localUser);
+      console.log(getMenus);
+      setMenus(getMenus);
 
       onAuthStateChanged(AUTH, (user) => {
         
@@ -177,30 +188,29 @@ export default function AdminLayout({
           </Card>
           
           <List>
-            {['dashboard'].map((text, index) => (
-              <ListItem key={text} disablePadding>
-                <ListItemButton onClick={ () => { go(text) }}>
+            <ListItem key={'dashboard'} disablePadding>
+                <ListItemButton onClick={ () => { go('dashboard') }}>
                   <ListItemIcon>
-                    <IconConvert name={text}/>
+                    <IconConvert name={'dashboard'}/>
                   </ListItemIcon>
-                  <ListItemText primary={text} />
+                  <ListItemText primary={'dashboard'} />
+                </ListItemButton>
+            </ListItem>
+            
+          </List>
+          <Divider />
+          <List>
+            { menus.map((m, i) => (
+              <ListItem key={i} disablePadding>
+                <ListItemButton onClick={ () => { go(m.route) }}>
+                  <ListItemIcon>
+                    <FontAwesomeIcon icon={m.icon}/>
+                  </ListItemIcon>
+                  <ListItemText primary={m.label} />
                 </ListItemButton>
               </ListItem>
             ))}
           </List>
-          <Divider />
-          {/* <List>
-            {['All mail', 'Trash', 'Spam'].map((text, index) => (
-              <ListItem key={text} disablePadding>
-                <ListItemButton>
-                  <ListItemIcon>
-                    {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                  </ListItemIcon>
-                  <ListItemText primary={text} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List> */}
           <div style={{bottom:0, position:"absolute"}}>Version { Pkg.version }-beta</div>
         </Box>
     );
