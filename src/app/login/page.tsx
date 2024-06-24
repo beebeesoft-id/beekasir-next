@@ -27,7 +27,8 @@ export default function Login() {
     console.log("initial Load");
     
     setLoading(false);
-  
+    console.log(loading);
+    
     return () => {
       
     }
@@ -197,8 +198,9 @@ export default function Login() {
               </div>
               <br/>
               <div>
-              <LinearProgress hidden={!loading} />
-              <Alert hidden={!loading} severity="info">{loadingDesc}</Alert>
+                
+              { (loading) && <LinearProgress /> }
+              { (loading) && <Alert severity="info">{loadingDesc}</Alert> }
               </div>
             </form>
   
