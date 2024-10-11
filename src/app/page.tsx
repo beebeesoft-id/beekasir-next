@@ -68,7 +68,7 @@ export default function Home() {
             BeeKasir Web{' '}
           </h2>
           <p className={`text-center`}>
-            Login or Register on BeeKasir Weeb Soon.
+            Login Beekasir Web Now.
           </p>
         </Link>
 
