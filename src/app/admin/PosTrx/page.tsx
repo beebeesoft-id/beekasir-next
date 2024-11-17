@@ -609,17 +609,17 @@ export default function PosTrx() {
                             </Typography> */}
                             </MenuItem> }
 
-                            <Link href={ '/nota?c=' + user?.companyId + '&b=' + user?.branchId + '&t=' + trx.trxId } target="_blank">
+                            {/* <Link href={ '/nota?c=' + user?.companyId + '&b=' + user?.branchId + '&t=' + trx.trxId } target="_blank">
                             <MenuItem>
                             <ListItemIcon>
                                 <FontAwesomeIcon icon={'print'}/>
                             </ListItemIcon>
                             <ListItemText>Faktur Penjualan</ListItemText>
-                            {/* <Typography variant="body2" color="text.secondary">
+                            <Typography variant="body2" color="text.secondary">
                                 ⌘P
-                            </Typography> */}
+                            </Typography> 
                             </MenuItem>
-                            </Link>
+                            </Link>*/}
 
                             <Divider />
 
