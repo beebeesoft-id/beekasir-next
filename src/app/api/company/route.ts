@@ -26,10 +26,10 @@ export async function POST(req : Request, response : Response, head : Headers) {
       const ref2 = doc(DB, link2);
 
       const company = (await getDoc(ref)).data();
-      console.log(company);
+      //console.log(company);
 
       const branch = (await getDoc(ref2)).data();
-      console.log(branch);
+      //console.log(branch);
 
       const data = { ...company, ...branch }
       return NextResponse.json({ 'data': data });
