@@ -37,7 +37,7 @@ export default function Login() {
 
   async function getUser(user : any) {
     setLoading(true);
-    setLoadingDesc('Check User');
+    setLoadingDesc('Memeriksa Otentikasi 1/4');
     
     const ref = doc(DB, 'Users', user.username);
     const data = await getDoc(ref);
@@ -61,7 +61,7 @@ export default function Login() {
   async function getCompany(user : any, login: any) {
     try {
       setLoading(true);
-      setLoadingDesc('Check Data Usaha');
+      setLoadingDesc('Memeriksa Otentikasi 2/4');
       //console.log(user);
       
       const ref = doc(DB, 'Company', user.companyId);
@@ -94,7 +94,7 @@ export default function Login() {
   async function getBranch(user : any, login: any) {
     try {
       setLoading(true);
-      setLoadingDesc('Check Cabang User');
+      setLoadingDesc('Memeriksa Otentikasi 3/4');
       //console.log(user);
       
       const ref = doc(DB, 'Company/' + user.companyId + '/Branch', user.branchId);
@@ -122,13 +122,13 @@ export default function Login() {
 
   async function checkLDAP(user : any) {
     setLoading(true);
-    setLoadingDesc('Check LDAP');
+    setLoadingDesc('Memeriksa Otentikasi 4/4');
     
     signInWithEmailAndPassword(AUTH, user.username, user.password).then((value) => {
       ToastSweet('success', 'Welcome ' + value.user.email + '.');
       
       setLoadingDesc('Anda akan diarahkan ke halaman admin.');
-      router.push('/admin');
+      router.push('/admin/PosTrx');
       setLoading(false);
     }).catch((err) => {
       setLoading(false);
