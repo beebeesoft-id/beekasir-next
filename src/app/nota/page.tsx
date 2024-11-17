@@ -38,10 +38,11 @@ export default function Nota({
         const b : string | null = param.get('b');
         const t : string | null = param.get('t');
         
-        getCompany(c, b);
-        getNota(c, t);
-        getNotaItems(c, t);
+        await getCompany(c, b);
+        await getNota(c, t);
+        await getNotaItems(c, t);
         
+        window.print();
     }
 
     async function getNota(c : string | null, t : string | null) {
@@ -81,6 +82,8 @@ export default function Nota({
     }
 
     async function getNotaItems(c : string | null, t : string | null) {
+        console.log("Get Nota");
+        
         const api = await fetch('/api/notaitems', {
             method: 'POST',
             headers :  {
@@ -94,7 +97,7 @@ export default function Nota({
 
         const res = await api.json();
         const data = await res.data;
-        // console.log(data);
+        console.log(data);
         if (data) {
             setItems(data);    
         }
