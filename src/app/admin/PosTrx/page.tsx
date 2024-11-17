@@ -462,7 +462,7 @@ export default function PosTrx() {
         )
     }
 
-    const savePesan = async() => {
+    const savePesanAndNew = async() => {
         if (items.length == 0) {
             AlertSweet('info','Info','Tidak ada Item untuk disimpan');
         } else {
@@ -471,6 +471,15 @@ export default function PosTrx() {
             AlertSweet('success','Tersimpan','Pesanan transaksi disimpan.');
             initTrx();
             setItems([]); 
+        }
+    }
+
+    const savePesan = async() => {
+        if (items.length == 0) {
+            AlertSweet('info','Info','Tidak ada Item untuk disimpan');
+        } else {
+            await submitTransaction();
+            AlertSweet('success','Tersimpan','Pesanan transaksi disimpan.');
         }
     }
 
@@ -589,11 +598,20 @@ export default function PosTrx() {
                     
 
                         <MenuList>
+                            { (trx?.status != 'LUNAS') && <MenuItem onClick={savePesanAndNew}>
+                            <ListItemIcon>
+                                <FontAwesomeIcon icon={'floppy-disk'}/>
+                            </ListItemIcon>
+                            <ListItemText>Simpan dan Buat Baru</ListItemText>
+                            {/* <Typography variant="body2" color="text.secondary">
+                                ⌘S
+                            </Typography> */}
+                            </MenuItem> }
                             { (trx?.status != 'LUNAS') && <MenuItem onClick={savePesan}>
                             <ListItemIcon>
                                 <FontAwesomeIcon icon={'floppy-disk'}/>
                             </ListItemIcon>
-                            <ListItemText>Simpan dan Baru</ListItemText>
+                            <ListItemText>Simpan</ListItemText>
                             {/* <Typography variant="body2" color="text.secondary">
                                 ⌘S
                             </Typography> */}
@@ -635,18 +653,18 @@ export default function PosTrx() {
                             </Typography> */}
                             </MenuItem> }
 
-                            <MenuItem 
+                            {/* <MenuItem 
                             onClick={cancel}
                             style={{backgroundColor:'#FF5733', color:'#ffffff'}}>
                             <ListItemIcon>
                                 
-                                <FontAwesomeIcon icon={'trash-alt'} color="#ffffff"/>
+                                <FontAwesomeIcon icon={'arrow-left'} color="#ffffff"/>
                             </ListItemIcon>
                             <ListItemText>Kembali</ListItemText>
-                            {/* <Typography variant="body2" color="#ffffff">
+                            <Typography variant="body2" color="#ffffff">
                                 Alt + C
-                            </Typography> */}
-                            </MenuItem>
+                            </Typography> 
+                            </MenuItem>*/}
                         </MenuList>
                     </Card>
                 </Grid>
