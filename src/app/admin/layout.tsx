@@ -186,13 +186,13 @@ export default function AdminLayout({
               title={ user?.fullName }
               subheader="Owner"
             />
-            <CardActions>
+            {/* <CardActions>
               <Button size="small">Profile</Button>
               <Button size="small">Upgrade</Button>
-            </CardActions>
+            </CardActions> */}
           </Card>
           
-          <List>
+          {/* <List>
             <ListItem key={'dashboard'} disablePadding>
                 <ListItemButton onClick={ () => { go('dashboard') }}>
                   <ListItemIcon>
@@ -202,7 +202,7 @@ export default function AdminLayout({
                 </ListItemButton>
             </ListItem>
             
-          </List>
+          </List> */}
           <Divider />
           <List>
             { menus.map((m, i) => (
@@ -216,7 +216,7 @@ export default function AdminLayout({
               </ListItem>
             ))}
           </List>
-          <div style={{bottom:0, position:"absolute"}}>Version { Pkg.version }-beta</div>
+          <div style={{bottom:0, position:"absolute", paddingLeft:10}}>Version { Pkg.version }</div>
         </Box>
     );
     
@@ -244,6 +244,7 @@ export default function AdminLayout({
                     color="inherit"
                     onClick={handleClick}
                 >
+                  { user?.fullName }
                     <AccountCircle/>
                 </Button>
                 <Menu
@@ -255,8 +256,8 @@ export default function AdminLayout({
                     'aria-labelledby': 'basic-button',
                     }}
                 >
-                    <MenuItem onClick={handleClose}>Profile</MenuItem>
-                    <MenuItem onClick={handleClose}>My account</MenuItem>
+                    {/* <MenuItem onClick={handleClose}>Profile</MenuItem>
+                    <MenuItem onClick={handleClose}>My account</MenuItem> */}
                     <Divider />
                     <MenuItem onClick={onLogout}>
                         <ListItemIcon>
