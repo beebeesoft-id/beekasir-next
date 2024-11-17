@@ -93,11 +93,11 @@ export default function Products({
     const data = await res.data;
 
     setData(data);
-    if (data.length == 0) {
-      console.log("data length 0");
+    // if (data.length == 0) {
+    //   console.log("data length 0");
 
-      router.replace('/404');
-    }
+    //   router.replace('/404');
+    // }
   }
 
   async function getCompany(c: string | null, b: string | null) {
