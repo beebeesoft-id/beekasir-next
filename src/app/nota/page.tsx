@@ -138,10 +138,7 @@ export default function Nota({
             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
             <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
-                <th>No</th>
-                <th>Produk/Layanan</th>
-                <th>Qty</th>
-                <th>Total</th>
+                <th align="center">List Item</th>
                 </tr>
             </thead>
             
@@ -149,10 +146,10 @@ export default function Nota({
                     return (
                         <tbody key={i}>
                         <tr >
-                        <td className="text-center">{ i+1 }</td>
-                        <td>{data.productName}</td>
-                        <td className="text-right">{data.qty}</td>
-                        <td className="text-right">Rp{ formatCcy(data.price) }</td>
+                        <td>{ i+1 } | {data.productName}</td>
+                        </tr>
+                        <tr >
+                        <td className="text-right">{data.qty} x Rp{ formatCcy(data.price) }</td>
                         </tr>
                         </tbody>
                     )

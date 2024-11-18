@@ -627,7 +627,7 @@ export default function PosTrx() {
                             </Typography> */}
                             </MenuItem> }
 
-                            {/* <Link href={ '/nota?c=' + user?.companyId + '&b=' + user?.branchId + '&t=' + trx.trxId } target="_blank">
+                            <Link href={ '/nota?c=' + user?.companyId + '&b=' + user?.branchId + '&t=' + trx.trxId } target="_blank">
                             <MenuItem>
                             <ListItemIcon>
                                 <FontAwesomeIcon icon={'print'}/>
@@ -637,7 +637,7 @@ export default function PosTrx() {
                                 ⌘P
                             </Typography> 
                             </MenuItem>
-                            </Link>*/}
+                            </Link>
 
                             <Divider />
 
