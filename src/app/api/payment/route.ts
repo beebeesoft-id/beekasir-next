@@ -14,9 +14,9 @@ export async function POST(req : Request, response : Response, head : Headers) {
       const headersList = headers();
       const apiKey  = headersList.get('user-agent');
       
-      if (apiKey != 'Veritrans') {
-        return NextResponse.json({ 'data': 'Access Forbbiden', 'status': '401', 'statusDesc' : 'Alert access unidentified'});
-      }
+      // if (apiKey != 'Veritrans') {
+      //   return NextResponse.json({ 'data': 'Access Forbbiden', 'status': '401', 'statusDesc' : 'Alert access unidentified'});
+      // }
       const refBill = doc(DB, "Billing/" + body.order_id);
       await updateDoc(refBill, body);
       const bill = (await getDoc(refBill)).data();
