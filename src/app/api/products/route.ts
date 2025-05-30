@@ -10,9 +10,9 @@ export async function POST(req : Request, response : Response, head : Headers) {
       const apiKey  = headersList.get('apikey');
       console.log(body);
       
-      if ((!apiKey) || (apiKey != process.env.APIKEY)) {
-        return NextResponse.json({ 'data': [], 'error': 'Not Authenticated.' });
-      }
+      // if ((!apiKey) || (apiKey != process.env.APIKEY)) {
+      //   return NextResponse.json({ 'data': [], 'error': 'Not Authenticated.' });
+      // }
       
       if (!body.companyId || !body.branchId) {
         return NextResponse.json({ 'data': [], 'error': 'Parameter Required.' });
