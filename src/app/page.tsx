@@ -8,6 +8,7 @@ export default function Home() {
     <main>
       <Grid container spacing={2} className='bg-white z-9999'>
         <Grid item md={6}>
+          <div className='flex items-center'>
           <Image
             className="relative"
             src="/beekasir-name.svg"
@@ -16,29 +17,33 @@ export default function Home() {
             height={30}
             priority
           />
-          Beekasir - Aplikasi Kasir | POS v{Pkg.version}
+            Beekasir - Aplikasi Kasir | POS v{Pkg.version}
+          </div>
+
         </Grid>
         <Grid item md={6} textAlign={'right'}>
-          By Beebeesoft
-        <Image
-              src="/beebeesoft.svg"
-              alt="Beebeesoft Logo"
-              width={30}
-              height={30}
-              priority
-            />
+          <div className='flex items-center justify-end'>
+          By Warza Teknologi
+          <Image
+            src="/warza-logo.svg"
+            alt="Warza Logo"
+            width={30}
+            height={30}
+            priority
+          />
+          </div>
         </Grid>
       </Grid>
 
       <div>
         <Image
-        fill
-              src="/bg-beekasir.png"
-              alt="Beekasir Logo"
-              sizes='80vw'
-              style={{zIndex:-1, objectFit:'cover'}}
-              priority
-            />
+          fill
+          src="/bg-beekasir.png"
+          alt="Beekasir Logo"
+          sizes='80vw'
+          style={{ zIndex: -1, objectFit: 'cover' }}
+          priority
+        />
       </div>
 
       <div className="mb-32 grid text-center bg-white fixed bottom-0 lg:mb-0 lg:grid-cols-4 lg:text-center w-full">
@@ -61,7 +66,7 @@ export default function Home() {
         <Link
           href="/admin"
           className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          
+
           rel="noopener noreferrer"
         >
           <h2 className={`text-center`}>
@@ -75,7 +80,7 @@ export default function Home() {
         <Link
           href="/public/pricing"
           className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          
+
           rel="noopener noreferrer"
         >
           <h2 className={`text-center`}>
