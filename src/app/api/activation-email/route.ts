@@ -6,6 +6,8 @@ import { today } from '@/service/helper';
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token = searchParams.get('token');
+  const baseUrl = process.env.NEXT_BASE_URL;
+  let redirectPage = "/activation-email";
 
   // if (!token) {
   //   return NextResponse.redirect(new URL('/failure', request.url));
@@ -14,28 +16,23 @@ export async function GET(request: NextRequest) {
   try {
     // 1. Cari pengguna berdasarkan token verifikasi
     // Asumsi Anda memiliki field 'verificationToken' di dokumen pengguna
-    const ref : any = "Users/";
+    const ref: any = "Users/";
     const list = collection(DB, ref);
-    console.log(list);
-    
-    const filter = query(list, where('key','==',token));
-    console.log(filter);
-    
-const data = (await getDocs(filter)).docs;
-console.log(data);
+    const filter = query(list, where('key', '==', token));
+    const data = (await getDocs(filter)).docs;
 
     // 2. Jika tidak ada pengguna dengan token tersebut, berarti token tidak valid
     if (data.length == 0) {
-      return NextResponse.redirect(new URL('/activation-email?status=already_verified', request.url));
-    } else if(data.length == 1){
+      redirectPage = '/activation-email?status=already_verified';
+    } else if (data.length == 1) {
       let user = data[0].data();
       console.log(user);
       const refUser = doc(DB, ref + user.username);
-      await updateDoc(refUser, { 'userStatus' : 'Active', 'key' : '', 'updatedDate' : today()});
-      
-      return NextResponse.redirect(new URL('/activation-email?status=success_verified', request.url));
+      await updateDoc(refUser, { 'userStatus': 'Active', 'key': '', 'updatedDate': today() });
+
+      redirectPage = '/activation-email?status=success_verified';
     } else {
-      return NextResponse.redirect(new URL('/activation-email?status=failed_verified', request.url));
+      redirectPage = '/activation-email?status=failed_verified';
     }
 
     // const userDoc = userSnapshot.docs[0];
@@ -56,7 +53,7 @@ console.log(data);
     // });
 
     // 5. Redirect ke halaman sukses setelah verifikasi berhasil
-    return NextResponse.redirect(new URL('/activation-email', request.url));
+    return NextResponse.redirect(baseUrl + redirectPage);
   } catch (error) {
     console.error('Error during email verification:', error);
     // Redirect ke halaman gagal jika terjadi error tak terduga
